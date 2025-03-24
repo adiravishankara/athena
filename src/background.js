@@ -2,7 +2,29 @@
 
 console.log("Background script loaded");
 
-// Function to inject the floating button into a tab
+// We'll use messaging to communicate with the content script
+function notifyResearchModeStatus(tabId, isEnabled) {
+  try {
+    chrome.tabs.sendMessage(tabId, { 
+      action: 'RESEARCH_MODE_CHANGED', 
+      isEnabled: isEnabled 
+    }).catch(error => {
+      // If we can't send a message (likely because content script isn't loaded yet),
+      // we'll fall back to script injection only for pages where it's needed
+      if (isEnabled) {
+        injectFloatingButton(tabId);
+      }
+    });
+  } catch (err) {
+    console.log('Error sending message to tab', tabId, err);
+    // Fallback to direct injection if messaging fails
+    if (isEnabled) {
+      injectFloatingButton(tabId);
+    }
+  }
+}
+
+// Function to inject the floating button into a tab (as fallback)
 function injectFloatingButton(tabId) {
   // Check if the tab exists and has a valid URL
   chrome.tabs.get(tabId, (tab) => {
@@ -17,30 +39,30 @@ function injectFloatingButton(tabId) {
     chrome.scripting.executeScript({
       target: { tabId: tabId },
       function: () => {
-        // This function runs in the context of the web page
-        // Check if the button already exists
-        if (document.getElementById("athena-floating-button")) return;
+        // Don't re-inject if the button or content script is already there
+        if (window.athenaContentScriptLoaded || document.getElementById("athena-floating-button")) return;
         
         const button = document.createElement("div");
         button.id = "athena-floating-button";
         button.innerHTML = "+";
         button.style.position = "fixed";
-        button.style.bottom = "20px";
+        button.style.top = "50%"; // Position in the middle vertically
         button.style.right = "20px";
+        button.style.transform = "translateY(-50%)"; // Center it perfectly
         button.style.background = "#004d40";
         button.style.color = "white";
-        button.style.padding = "15px 18px";
+        button.style.padding = "18px 22px"; // Increased padding for bigger button
         button.style.borderRadius = "50%";
-        button.style.fontSize = "24px";
+        button.style.fontSize = "30px"; // Increased font size
         button.style.fontWeight = "bold";
         button.style.cursor = "pointer";
-        button.style.zIndex = "10000";
-        button.style.boxShadow = "0 2px 5px rgba(0,0,0,0.3)";
+        button.style.zIndex = "10000"; // High z-index to appear over other elements
+        button.style.boxShadow = "0 3px 8px rgba(0,0,0,0.4)"; // Enhanced shadow
         button.style.display = "flex";
         button.style.justifyContent = "center";
         button.style.alignItems = "center";
-        button.style.width = "40px";
-        button.style.height = "40px";
+        button.style.width = "50px"; // Increased width
+        button.style.height = "50px"; // Increased height
 
         // Make the button draggable
         let isDragging = false;
@@ -59,6 +81,7 @@ function injectFloatingButton(tabId) {
             
             button.style.right = 'auto';
             button.style.bottom = 'auto';
+            button.style.transform = 'none'; // Remove transform when dragging
             button.style.left = left + 'px';
             button.style.top = top + 'px';
           }
@@ -74,27 +97,44 @@ function injectFloatingButton(tabId) {
             const url = window.location.href;
             const title = document.title;
             
+            // First check if this URL already exists in the current notebook
             chrome.runtime.sendMessage({
-              action: 'ADD_SOURCE',
-              url: url,
-              title: title,
-              type: 'web',
-              datetime: new Date().toISOString()
+              action: 'CHECK_URL_EXISTS',
+              url: url
+            }, response => {
+              if (response && response.exists) {
+                // URL already exists, show permanent checkmark
+                button.innerHTML = "✓";
+                button.style.background = '#2e7d32';
+                button.style.pointerEvents = 'none'; // Disable further clicks
+              } else {
+                // URL doesn't exist, add it
+                chrome.runtime.sendMessage({
+                  action: 'ADD_SOURCE',
+                  url: url,
+                  title: title,
+                  type: 'web',
+                  datetime: new Date().toISOString()
+                });
+                
+                // Visual feedback
+                const originalColor = button.style.background;
+                button.style.background = '#2e7d32';
+                button.innerHTML = "✓";
+                
+                setTimeout(() => {
+                  button.style.background = originalColor;
+                  button.innerHTML = "+";
+                }, 1000);
+              }
             });
-            
-            // Visual feedback
-            const originalColor = button.style.background;
-            button.style.background = '#2e7d32';
-            button.innerHTML = "✓";
-            
-            setTimeout(() => {
-              button.style.background = originalColor;
-              button.innerHTML = "+";
-            }, 1000);
           }
         });
 
         document.body.appendChild(button);
+        
+        // Mark that we've handled this page
+        window.athenaContentScriptLoaded = true;
       }
     }).catch(error => {
       console.error('Script injection error:', error);
@@ -104,6 +144,23 @@ function injectFloatingButton(tabId) {
 
 // Function to remove the floating button from a tab
 function removeFloatingButton(tabId) {
+  try {
+    // Try to use messaging first
+    chrome.tabs.sendMessage(tabId, { 
+      action: 'RESEARCH_MODE_CHANGED', 
+      isEnabled: false 
+    }).catch(error => {
+      // Fall back to direct script injection if needed
+      executeRemoveScript(tabId);
+    });
+  } catch (err) {
+    console.log('Error sending message to tab', tabId, err);
+    // Fallback to direct removal if messaging fails
+    executeRemoveScript(tabId);
+  }
+}
+
+function executeRemoveScript(tabId) {
   chrome.scripting.executeScript({
     target: { tabId: tabId },
     function: () => {
@@ -145,8 +202,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       const isResearchMode = result.researchMode || false;
       
       if (isResearchMode) {
-        // Inject the floating button if research mode is active
-        injectFloatingButton(tabId);
+        // Notify the content script about the research mode status
+        notifyResearchModeStatus(tabId, true);
       }
     });
   }
@@ -159,7 +216,7 @@ chrome.tabs.onCreated.addListener((tab) => {
     const isResearchMode = result.researchMode || false;
     
     if (isResearchMode) {
-      // We'll wait for the tab to finish loading before injecting the button
+      // We'll wait for the tab to finish loading before notifying
       // The onUpdated listener will handle this
     }
   });
@@ -294,24 +351,57 @@ function toggleResearchMode(enabled) {
   return new Promise((resolve) => {
     chrome.storage.local.set({ researchMode: enabled }, () => {
       if (enabled) {
-        // When enabling research mode, inject the button into all tabs
+        // When enabling research mode, notify all tabs
         chrome.tabs.query({}, (tabs) => {
           for (const tab of tabs) {
-            // Try to inject the floating button into each tab
-            injectFloatingButton(tab.id);
+            // Try to notify the content script in each tab
+            notifyResearchModeStatus(tab.id, true);
           }
         });
       } else {
-        // When disabling research mode, remove the button from all tabs
+        // When disabling research mode, notify all tabs
         chrome.tabs.query({}, (tabs) => {
           for (const tab of tabs) {
-            // Try to remove the floating button from each tab
-            removeFloatingButton(tab.id);
+            // Try to notify the content script or remove the button directly
+            notifyResearchModeStatus(tab.id, false);
           }
         });
       }
       
       resolve({ researchMode: enabled });
+    });
+  });
+}
+
+// Add a function to check if a URL already exists in the current notebook
+function checkUrlExists(url) {
+  return new Promise((resolve, reject) => {
+    if (!url) {
+      reject(new Error('URL is required'));
+      return;
+    }
+    
+    chrome.storage.local.get(['notebooks', 'currentNotebook'], (result) => {
+      const notebooks = result.notebooks || {};
+      const currentNotebook = result.currentNotebook;
+      
+      if (!currentNotebook || !notebooks[currentNotebook]) {
+        resolve({ exists: false });
+        return;
+      }
+      
+      // Check if the URL exists in the current notebook
+      const sources = notebooks[currentNotebook];
+      let exists = false;
+      
+      for (const sourceId in sources) {
+        if (sources[sourceId].url === url) {
+          exists = true;
+          break;
+        }
+      }
+      
+      resolve({ exists });
     });
   });
 }
@@ -327,6 +417,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   
+  if (request.action === 'CHECK_URL_EXISTS') {
+    checkUrlExists(request.url)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ error: error.message }));
+    return true;
+  }
+  
   if (request.action === 'ADD_SOURCE') {
     chrome.storage.local.get(['currentNotebook'], (result) => {
       if (!result.currentNotebook) {
@@ -334,13 +431,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return;
       }
       
-      addSourceToNotebook(result.currentNotebook, {
-        url: request.url,
-        title: request.title,
-        type: request.type,
-        datetime: request.datetime
-      })
-        .then(result => sendResponse({ status: 'success', data: result }))
+      // First check if this URL already exists
+      checkUrlExists(request.url)
+        .then(existsResult => {
+          if (existsResult.exists) {
+            // URL already exists, don't add it again
+            sendResponse({ status: 'success', data: { alreadyExists: true } });
+          } else {
+            // URL doesn't exist, add it
+            addSourceToNotebook(result.currentNotebook, {
+              url: request.url,
+              title: request.title,
+              type: request.type,
+              datetime: request.datetime
+            })
+              .then(result => sendResponse({ status: 'success', data: result }))
+              .catch(error => sendResponse({ status: 'error', error: error.message }));
+          }
+        })
         .catch(error => sendResponse({ status: 'error', error: error.message }));
     });
     return true;

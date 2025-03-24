@@ -1,7 +1,10 @@
 // contentScript.js
 
-// This script checks if research mode is active and injects the floating button if it is
+// This script handles the floating button in research mode
 console.log("Content script loaded");
+
+// Set a global flag to indicate the content script is loaded
+window.athenaContentScriptLoaded = true;
 
 // Check if research mode is active
 chrome.storage.local.get(['researchMode'], function(result) {
@@ -12,7 +15,7 @@ chrome.storage.local.get(['researchMode'], function(result) {
   }
 });
 
-// Listen for research mode toggle changes
+// Listen for research mode toggle changes from storage
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   if (namespace === 'local' && changes.researchMode) {
     const isResearchMode = changes.researchMode.newValue;
@@ -25,30 +28,52 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
   }
 });
 
+// Listen for messages from the background script
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log('Content script received message:', request);
+  
+  if (request.action === 'RESEARCH_MODE_CHANGED') {
+    if (request.isEnabled) {
+      injectFloatingButton();
+    } else {
+      removeFloatingButton();
+    }
+    // Acknowledge receipt
+    if (sendResponse) {
+      sendResponse({ status: 'success' });
+    }
+  }
+  
+  // Return true for async response
+  return true;
+});
+
 // Function to inject the floating button
 function injectFloatingButton() {
+  // Don't inject if already exists
   if (document.getElementById("athena-floating-button")) return;
 
   const button = document.createElement("div");
   button.id = "athena-floating-button";
   button.innerHTML = "+";
   button.style.position = "fixed";
-  button.style.bottom = "20px";
+  button.style.top = "50%"; // Position in the middle vertically
   button.style.right = "20px";
+  button.style.transform = "translateY(-50%)"; // Center it perfectly
   button.style.background = "#004d40";
   button.style.color = "white";
-  button.style.padding = "15px 18px";
+  button.style.padding = "18px 22px"; // Increased padding for bigger button
   button.style.borderRadius = "50%";
-  button.style.fontSize = "24px";
+  button.style.fontSize = "30px"; // Increased font size
   button.style.fontWeight = "bold";
   button.style.cursor = "pointer";
-  button.style.zIndex = "10000";
-  button.style.boxShadow = "0 2px 5px rgba(0,0,0,0.3)";
+  button.style.zIndex = "10000"; // High z-index to appear over other elements
+  button.style.boxShadow = "0 3px 8px rgba(0,0,0,0.4)"; // Enhanced shadow
   button.style.display = "flex";
   button.style.justifyContent = "center";
   button.style.alignItems = "center";
-  button.style.width = "40px";
-  button.style.height = "40px";
+  button.style.width = "50px"; // Increased width
+  button.style.height = "50px"; // Increased height
 
   // Make the button draggable
   let isDragging = false;
@@ -67,6 +92,7 @@ function injectFloatingButton() {
       
       button.style.right = 'auto';
       button.style.bottom = 'auto';
+      button.style.transform = 'none'; // Remove transform when dragging
       button.style.left = left + 'px';
       button.style.top = top + 'px';
     }
@@ -82,23 +108,37 @@ function injectFloatingButton() {
       const url = window.location.href;
       const title = document.title;
       
+      // First check if this URL already exists in the current notebook
       chrome.runtime.sendMessage({
-        action: 'ADD_SOURCE',
-        url: url,
-        title: title,
-        type: 'web',
-        datetime: new Date().toISOString()
+        action: 'CHECK_URL_EXISTS',
+        url: url
+      }, response => {
+        if (response && response.exists) {
+          // URL already exists, show permanent checkmark
+          button.innerHTML = "✓";
+          button.style.background = '#2e7d32';
+          button.style.pointerEvents = 'none'; // Disable further clicks
+        } else {
+          // URL doesn't exist, add it
+          chrome.runtime.sendMessage({
+            action: 'ADD_SOURCE',
+            url: url,
+            title: title,
+            type: 'web',
+            datetime: new Date().toISOString()
+          });
+          
+          // Visual feedback
+          const originalColor = button.style.background;
+          button.style.background = '#2e7d32';
+          button.innerHTML = "✓";
+          
+          setTimeout(() => {
+            button.style.background = originalColor;
+            button.innerHTML = "+";
+          }, 1000);
+        }
       });
-      
-      // Visual feedback
-      const originalColor = button.style.background;
-      button.style.background = '#2e7d32';
-      button.innerHTML = "✓";
-      
-      setTimeout(() => {
-        button.style.background = originalColor;
-        button.innerHTML = "+";
-      }, 1000);
     }
   });
 

@@ -20,6 +20,7 @@ declare global {
       tabs: {
         query: (queryInfo: {active: boolean, currentWindow: boolean}, 
                 callback: (tabs: {id: number, url: string, title: string}[]) => void) => void;
+        update: (tabId: number, updateInfo: {url: string}, callback?: () => void) => void;
       };
     };
   }
@@ -147,15 +148,27 @@ function App() {
 
   // Delete a source
   const handleDeleteSource = (sourceId: string) => {
-    if (!currentNotebook) return
+    if (!currentNotebook) return;
 
-    chrome.runtime.sendMessage(
-      { action: 'DELETE_SOURCE', notebookName: currentNotebook, sourceId },
-      (response) => {
-        console.log('Source Deleted:', response)
+    if (confirm('Are you sure you want to delete this source?')) {
+      chrome.runtime.sendMessage(
+        { action: 'DELETE_SOURCE', notebookName: currentNotebook, sourceId },
+        (response) => {
+          console.log('Source Deleted:', response);
+        }
+      );
+    }
+  };
+
+  // Add a function to open source URL
+  const handleOpenSource = (url: string) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length > 0) {
+        // Update the current tab to the source URL
+        chrome.tabs.update(tabs[0].id!, { url });
       }
-    )
-  }
+    });
+  };
 
   // Add current tab as source
   const handleAddCurrentTab = () => {
@@ -264,34 +277,42 @@ function App() {
 
       {/* Included Sources */}
       <div className="sources-section">
-        <h2>Included Sources</h2>
-        <ul className="source-list">
-          {sources.length > 0 ? (
-            sources.map(([id, source]) => (
-              <li key={id} className="source-item">
-                <div className="source-info">
-                  <span className="source-title">{source.title}</span>
-                  <span className="source-url">{source.url}</span>
-                </div>
-                <div className="source-actions">
-                  <span
-                    className="delete-button"
-                    onClick={() => handleDeleteSource(id)}
+        <h2>Included Sources {sources.length > 0 && <span className="source-count">({sources.length})</span>}</h2>
+        <div className="source-list-container">
+          <ul className="source-list">
+            {sources.length > 0 ? (
+              sources.map(([id, source]) => (
+                <li key={id} className="source-item">
+                  <div 
+                    className="source-info"
+                    onClick={() => handleOpenSource(source.url)}
                   >
-                    ×
-                  </span>
-                  <span className="checkmark">✓</span>
-                </div>
+                    <span className="source-title">{source.title}</span>
+                    <span className="source-url">{source.url}</span>
+                  </div>
+                  <div className="source-actions">
+                    <span
+                      className="delete-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSource(id);
+                      }}
+                    >
+                      ×
+                    </span>
+                    <span className="checkmark">✓</span>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <li className="no-sources">
+                {currentNotebook
+                  ? "No sources added yet. Click 'Add Current Tab to Notebook' to add sources."
+                  : "Please select or create a notebook first."}
               </li>
-            ))
-          ) : (
-            <li className="no-sources">
-              {currentNotebook
-                ? "No sources added yet. Click 'Add Current Tab to Notebook' to add sources."
-                : "Please select or create a notebook first."}
-            </li>
-          )}
-        </ul>
+            )}
+          </ul>
+        </div>
       </div>
 
       {/* Version Info */}
