@@ -264,7 +264,10 @@ function App() {
 
       {/* Included Sources */}
       <div className="sources-section">
-        <h2>Included Sources</h2>
+        <h2>
+          Included Sources
+          <span className="sources-count">{sources.length > 0 ? `(${sources.length})` : ''}</span>
+        </h2>
         <ul className="source-list">
           {sources.length > 0 ? (
             sources.map(([id, source]) => (

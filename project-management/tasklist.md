@@ -56,6 +56,14 @@
 - [x] Add alternative method to add sources
   - [x] Implement direct "Add Current Tab" button in extension popup UI
   - [x] Add functionality to get current tab URL and add to selected notebook
+- [x] Enhance floating button functionality
+  - [x] Make the button bigger for better visibility
+  - [x] Move the button to the middle of the screen vertically
+  - [x] Show checkmark permanently for already saved URLs
+  - [x] Prevent adding duplicate links to notebooks
+- [x] Improve UI for better user experience
+  - [x] Make only the included sources section scrollable
+  - [x] Add a counter to show the number of sources in a notebook
 - [ ] Test the extension in Chrome to verify all functionality works correctly
 - [ ] Fix any bugs or issues found during testing
 - [ ] Optimize performance for handling large numbers of sources
