@@ -1,0 +1,48 @@
+{
+    "manifest_version": 3,
+    "name": "Athena",
+    "version": "1.0.0",
+    "description": "A tool for NotebookLM",
+    "action": {
+      "default_popup": "index.html",
+      "default_icon": {
+        "16": "icons/athena16.ico",
+        "32": "icons/athena32.ico",
+        "48": "icons/athena48.ico",
+        "128": "icons/athena128.ico"
+      }
+    },
+
+    "permissions": [
+      "storage",
+      "activeTab",
+      "bookmarks",
+      "clipboardRead",
+      "debugger",
+      "storage",
+      "tabGroups",
+      "tabs",
+      "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "icons": {
+      "16": "icons/athena16.ico",
+      "32": "icons/athena32.ico",
+      "48": "icons/athena48.ico",
+      "128": "icons/athena128.ico"
+    },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["contentScript.js"]
+      }
+    ]
+  } 

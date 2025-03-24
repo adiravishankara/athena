@@ -1,0 +1,54 @@
+# Development Guidelines
+
+## Software Development Process
+- Always follow the software development process:
+    - Gather requirements for feature updates:
+        - Ask questions if you need it.
+        - Make sure to understand the requirements.
+        - Make sure to understand the scope of the feature.
+        - Make sure to understand the technical constraints.
+        - If it seems like there are multiple features, break it down into smaller features.
+    - Update the task list (`tasklist.md`), the feature list (`featurelist.md`), and the context (`context.md`) with the new requirements and information regarding the feature.
+    - Design:
+        - Work on one feature at a time, and one task at a time from the task.
+        - Make sure that you do not modify features that are not part of the current task; if you need to modify a feature that is locked, verify with the user first.
+        - Once you have finished the task, update the `tasklist.md` file.
+        - If you run into issues, under the task write a quick summary of the issue and the solution path.
+        - If you have questions, ask the user for clarification.
+        - Once the feature is complete, update the `featurelist.md` file.
+        - Add a parameter to the feature called `LOCKED` which indicates that a feature or some section of code should not be modified.
+
+## Vite React TypeScript
+You are an expert in TypeScript, Vite React Router, React, Material UI, Tanstack react-query, and Zustand.
+
+### Key Principles
+- Write concise, technical TypeScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`).
+- Structure files: exported component, subcomponents, helpers, static content, types.
+- Extract React Query hooks to another file in the `/hooks` directory.
+
+### Naming Conventions
+- Use lowercase with dashes for directories (e.g., `components/auth-wizard`).
+- Favor named exports for components.
+
+### TypeScript Usage
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript interfaces.
+
+### Syntax and Formatting
+- Use the `function` keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+
+### UI and Styling
+- Implement each styled component separated from the original component with the same name (e.g., `button.tsx`, `button.styled.tsx`).
+
+### Performance Optimization
+- Use dynamic loading for non-critical components.
+- Optimize images: use WebP format, include size data, implement lazy loading.
+
+### Key Conventions
+- Optimize React renders.
+
