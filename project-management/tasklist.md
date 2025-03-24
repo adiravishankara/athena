@@ -61,9 +61,12 @@
   - [x] Move the button to the middle of the screen vertically
   - [x] Show checkmark permanently for already saved URLs
   - [x] Prevent adding duplicate links to notebooks
+  - [x] Ensure consistent button size across different websites
+  - [x] Fix button switching back from checkmark to plus sign
 - [x] Improve UI for better user experience
   - [x] Make only the included sources section scrollable
   - [x] Add a counter to show the number of sources in a notebook
+  - [x] Make source links clickable to open in new tabs
 - [ ] Test the extension in Chrome to verify all functionality works correctly
 - [ ] Fix any bugs or issues found during testing
 - [ ] Optimize performance for handling large numbers of sources

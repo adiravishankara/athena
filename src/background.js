@@ -41,24 +41,30 @@ function injectFloatingButton(tabId) {
           const button = document.createElement("div");
           button.id = "athena-floating-button";
           button.innerHTML = isAlreadySaved ? "✓" : "+";
-          button.style.position = "fixed";
-          button.style.bottom = "50%"; // Center vertically
-          button.style.right = "20px";
-          button.style.transform = "translateY(50%)"; // Center adjustment
-          button.style.background = isAlreadySaved ? "#2e7d32" : "#004d40";
-          button.style.color = "white";
-          button.style.padding = "18px 22px"; // Increased padding
-          button.style.borderRadius = "50%";
-          button.style.fontSize = "28px"; // Increased font size
-          button.style.fontWeight = "bold";
-          button.style.cursor = "pointer";
-          button.style.zIndex = "10000";
-          button.style.boxShadow = "0 4px 8px rgba(0,0,0,0.4)"; // Enhanced shadow
-          button.style.display = "flex";
-          button.style.justifyContent = "center";
-          button.style.alignItems = "center";
-          button.style.width = "50px"; // Increased width
-          button.style.height = "50px"; // Increased height
+          button.style.position = "fixed !important";
+          button.style.bottom = "50% !important"; // Center vertically
+          button.style.right = "20px !important";
+          button.style.transform = "translateY(50%) !important"; // Center adjustment
+          button.style.background = isAlreadySaved ? "#2e7d32 !important" : "#004d40 !important";
+          button.style.color = "white !important";
+          button.style.width = "40px !important"; // Fixed width
+          button.style.height = "40px !important"; // Fixed height
+          button.style.padding = "0 !important"; // Remove padding
+          button.style.borderRadius = "50% !important";
+          button.style.fontSize = "24px !important"; // Fixed font size
+          button.style.fontWeight = "bold !important";
+          button.style.cursor = "pointer !important";
+          button.style.zIndex = "2147483647 !important"; // Maximum z-index value
+          button.style.boxShadow = "0 4px 8px rgba(0,0,0,0.4) !important";
+          button.style.display = "flex !important";
+          button.style.justifyContent = "center !important";
+          button.style.alignItems = "center !important";
+          button.style.lineHeight = "40px !important"; // Match height for centering
+          button.style.textAlign = "center !important";
+          button.style.fontFamily = "Arial, sans-serif !important"; // Prevent font inheritance
+          button.style.border = "none !important";
+          button.style.margin = "0 !important";
+          button.style.userSelect = "none !important"; // Prevent text selection
 
           // Make the button draggable
           let isDragging = false;
@@ -122,7 +128,7 @@ function injectFloatingButton(tabId) {
               }, (response) => {
                 if (response && response.status === 'success') {
                   // Visual feedback
-                  button.style.background = '#2e7d32';
+                  button.style.background = '#2e7d32 !important';
                   button.innerHTML = "✓";
                   
                   // Don't change back to + since it's now saved
@@ -150,6 +156,30 @@ function injectFloatingButton(tabId) {
           });
 
           document.body.appendChild(button);
+          
+          // Create a MutationObserver to ensure button attributes stay consistent
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                // Ensure the button style remains consistent
+                button.style.width = "40px !important";
+                button.style.height = "40px !important";
+                button.style.fontSize = "24px !important";
+                button.style.background = isAlreadySaved ? "#2e7d32 !important" : "#004d40 !important";
+                button.style.zIndex = "2147483647 !important";
+              } else if (mutation.type === 'childList' && mutation.target === button) {
+                // Ensure the button content remains consistent
+                button.innerHTML = isAlreadySaved ? "✓" : "+";
+              }
+            });
+          });
+          
+          // Start observing the button for attribute and content changes
+          observer.observe(button, { 
+            attributes: true,
+            attributeFilter: ['style'],
+            childList: true
+          });
         },
         args: [isUrlSaved]
       }).catch(error => {

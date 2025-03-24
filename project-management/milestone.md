@@ -2,7 +2,7 @@
 
 | Milestone                     | Description                                         | Achieved |
 |-------------------------------|-----------------------------------------------------|----------|
-| Initial Extension Prototype   | Basic UI, Research Mode toggle, persistent icon     | ✅ Week 2 |
+| Initial Extension Prototype   | Basic UI, Research Mode toggle, persistent icon     | ✅|
 | Notebook Integration          | Implement HTTP request simulation or Playwright     | |
 | BraveSearch API Integration   | Add intelligent source suggestions                  | |
 | Final Testing & Deployment    | QA testing, bug fixes, publish on Chrome Store      | | 
