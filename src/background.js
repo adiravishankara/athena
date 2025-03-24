@@ -13,91 +13,178 @@ function injectFloatingButton(tabId) {
       return;
     }
     
-    // Inject the floating button
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      function: () => {
-        // This function runs in the context of the web page
-        // Check if the button already exists
-        if (document.getElementById("athena-floating-button")) return;
-        
-        const button = document.createElement("div");
-        button.id = "athena-floating-button";
-        button.innerHTML = "+";
-        button.style.position = "fixed";
-        button.style.bottom = "20px";
-        button.style.right = "20px";
-        button.style.background = "#004d40";
-        button.style.color = "white";
-        button.style.padding = "15px 18px";
-        button.style.borderRadius = "50%";
-        button.style.fontSize = "24px";
-        button.style.fontWeight = "bold";
-        button.style.cursor = "pointer";
-        button.style.zIndex = "10000";
-        button.style.boxShadow = "0 2px 5px rgba(0,0,0,0.3)";
-        button.style.display = "flex";
-        button.style.justifyContent = "center";
-        button.style.alignItems = "center";
-        button.style.width = "40px";
-        button.style.height = "40px";
-
-        // Make the button draggable
-        let isDragging = false;
-        let offsetX, offsetY;
-
-        button.addEventListener('mousedown', function(e) {
-          isDragging = true;
-          offsetX = e.clientX - button.getBoundingClientRect().left;
-          offsetY = e.clientY - button.getBoundingClientRect().top;
-        });
-
-        document.addEventListener('mousemove', function(e) {
-          if (isDragging) {
-            const left = e.clientX - offsetX;
-            const top = e.clientY - offsetY;
-            
-            button.style.right = 'auto';
-            button.style.bottom = 'auto';
-            button.style.left = left + 'px';
-            button.style.top = top + 'px';
+    // Get current notebook to check if URL is already saved
+    chrome.storage.local.get(['currentNotebook', 'notebooks'], (result) => {
+      const currentNotebook = result.currentNotebook;
+      const notebooks = result.notebooks || {};
+      let isUrlSaved = false;
+      let notebookWithUrl = null;
+      
+      // Check if URL is already saved in any notebook
+      if (currentNotebook && notebooks[currentNotebook]) {
+        // Check if the URL is already in the current notebook
+        Object.values(notebooks[currentNotebook]).forEach((source) => {
+          if (source.url === url) {
+            isUrlSaved = true;
           }
         });
-
-        document.addEventListener('mouseup', function() {
-          isDragging = false;
-        });
-
-        // Add click handler to save the current URL
-        button.addEventListener('click', function(e) {
-          if (!isDragging) {
-            const url = window.location.href;
-            const title = document.title;
-            
-            chrome.runtime.sendMessage({
-              action: 'ADD_SOURCE',
-              url: url,
-              title: title,
-              type: 'web',
-              datetime: new Date().toISOString()
-            });
-            
-            // Visual feedback
-            const originalColor = button.style.background;
-            button.style.background = '#2e7d32';
-            button.innerHTML = "✓";
-            
-            setTimeout(() => {
-              button.style.background = originalColor;
-              button.innerHTML = "+";
-            }, 1000);
-          }
-        });
-
-        document.body.appendChild(button);
       }
-    }).catch(error => {
-      console.error('Script injection error:', error);
+      
+      // Inject the floating button
+      chrome.scripting.executeScript({
+        target: { tabId: tabId },
+        function: (isAlreadySaved) => {
+          // This function runs in the context of the web page
+          // Check if the button already exists
+          if (document.getElementById("athena-floating-button")) return;
+          
+          const button = document.createElement("div");
+          button.id = "athena-floating-button";
+          button.innerHTML = isAlreadySaved ? "✓" : "+";
+          button.style.position = "fixed !important";
+          button.style.bottom = "50% !important"; // Center vertically
+          button.style.right = "20px !important";
+          button.style.transform = "translateY(50%) !important"; // Center adjustment
+          button.style.background = isAlreadySaved ? "#2e7d32 !important" : "#004d40 !important";
+          button.style.color = "white !important";
+          button.style.width = "40px !important"; // Fixed width
+          button.style.height = "40px !important"; // Fixed height
+          button.style.padding = "0 !important"; // Remove padding
+          button.style.borderRadius = "50% !important";
+          button.style.fontSize = "24px !important"; // Fixed font size
+          button.style.fontWeight = "bold !important";
+          button.style.cursor = "pointer !important";
+          button.style.zIndex = "2147483647 !important"; // Maximum z-index value
+          button.style.boxShadow = "0 4px 8px rgba(0,0,0,0.4) !important";
+          button.style.display = "flex !important";
+          button.style.justifyContent = "center !important";
+          button.style.alignItems = "center !important";
+          button.style.lineHeight = "40px !important"; // Match height for centering
+          button.style.textAlign = "center !important";
+          button.style.fontFamily = "Arial, sans-serif !important"; // Prevent font inheritance
+          button.style.border = "none !important";
+          button.style.margin = "0 !important";
+          button.style.userSelect = "none !important"; // Prevent text selection
+
+          // Make the button draggable
+          let isDragging = false;
+          let offsetX, offsetY;
+
+          button.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            offsetX = e.clientX - button.getBoundingClientRect().left;
+            offsetY = e.clientY - button.getBoundingClientRect().top;
+          });
+
+          document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+              const left = e.clientX - offsetX;
+              const top = e.clientY - offsetY;
+              
+              button.style.right = 'auto';
+              button.style.bottom = 'auto';
+              button.style.left = left + 'px';
+              button.style.top = top + 'px';
+            }
+          });
+
+          document.addEventListener('mouseup', function() {
+            isDragging = false;
+          });
+
+          // Add click handler to save the current URL
+          button.addEventListener('click', function(e) {
+            if (!isDragging) {
+              if (isAlreadySaved) {
+                // If the URL is already saved, show a message
+                const toast = document.createElement("div");
+                toast.textContent = "Already added to notebook";
+                toast.style.position = "fixed";
+                toast.style.bottom = "100px";
+                toast.style.right = "20px";
+                toast.style.backgroundColor = "rgba(46, 125, 50, 0.9)";
+                toast.style.color = "white";
+                toast.style.padding = "10px 15px";
+                toast.style.borderRadius = "4px";
+                toast.style.zIndex = "10001";
+                document.body.appendChild(toast);
+                
+                setTimeout(() => {
+                  toast.remove();
+                }, 2000);
+                
+                return;
+              }
+              
+              const url = window.location.href;
+              const title = document.title;
+              
+              chrome.runtime.sendMessage({
+                action: 'ADD_SOURCE',
+                url: url,
+                title: title,
+                type: 'web',
+                datetime: new Date().toISOString()
+              }, (response) => {
+                if (response && response.status === 'success') {
+                  // Visual feedback
+                  button.style.background = '#2e7d32 !important';
+                  button.innerHTML = "✓";
+                  
+                  // Don't change back to + since it's now saved
+                  isAlreadySaved = true;
+                } else {
+                  // Show error toast
+                  const toast = document.createElement("div");
+                  toast.textContent = response && response.error ? response.error : "Failed to add to notebook";
+                  toast.style.position = "fixed";
+                  toast.style.bottom = "100px";
+                  toast.style.right = "20px";
+                  toast.style.backgroundColor = "rgba(211, 47, 47, 0.9)";
+                  toast.style.color = "white";
+                  toast.style.padding = "10px 15px";
+                  toast.style.borderRadius = "4px";
+                  toast.style.zIndex = "10001";
+                  document.body.appendChild(toast);
+                  
+                  setTimeout(() => {
+                    toast.remove();
+                  }, 2000);
+                }
+              });
+            }
+          });
+
+          document.body.appendChild(button);
+          
+          // Create a MutationObserver to ensure button attributes stay consistent
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                // Ensure the button style remains consistent
+                button.style.width = "40px !important";
+                button.style.height = "40px !important";
+                button.style.fontSize = "24px !important";
+                button.style.background = isAlreadySaved ? "#2e7d32 !important" : "#004d40 !important";
+                button.style.zIndex = "2147483647 !important";
+              } else if (mutation.type === 'childList' && mutation.target === button) {
+                // Ensure the button content remains consistent
+                button.innerHTML = isAlreadySaved ? "✓" : "+";
+              }
+            });
+          });
+          
+          // Start observing the button for attribute and content changes
+          observer.observe(button, { 
+            attributes: true,
+            attributeFilter: ['style'],
+            childList: true
+          });
+        },
+        args: [isUrlSaved]
+      }).catch(error => {
+        console.error('Script injection error:', error);
+      });
     });
   });
 }
@@ -340,8 +427,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         type: request.type,
         datetime: request.datetime
       })
-        .then(result => sendResponse({ status: 'success', data: result }))
-        .catch(error => sendResponse({ status: 'error', error: error.message }));
+        .then(result => {
+          console.log('Source added:', result);
+          sendResponse({ status: 'success', data: result });
+        })
+        .catch(error => {
+          console.error('Error adding source:', error);
+          sendResponse({ status: 'error', error: error.message });
+        });
     });
     return true;
   }

@@ -1,5 +1,7 @@
 # Development Guidelines
 
+You dont need to run any tools for this project such as building. I can manage that.
+
 ## Software Development Process
 - Always follow the software development process:
     - Gather requirements for feature updates:

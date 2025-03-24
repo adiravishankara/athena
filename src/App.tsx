@@ -20,6 +20,7 @@ declare global {
       tabs: {
         query: (queryInfo: {active: boolean, currentWindow: boolean}, 
                 callback: (tabs: {id: number, url: string, title: string}[]) => void) => void;
+        create: (createProperties: {url: string, active?: boolean}, callback?: (tab: any) => void) => void;
       };
     };
   }
@@ -195,6 +196,11 @@ function App() {
     });
   }
 
+  // Handle opening a source URL in a new tab
+  const handleOpenSource = (url: string) => {
+    chrome.tabs.create({ url, active: false });
+  }
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -264,12 +270,19 @@ function App() {
 
       {/* Included Sources */}
       <div className="sources-section">
-        <h2>Included Sources</h2>
+        <h2>
+          Included Sources
+          <span className="sources-count">{sources.length > 0 ? `(${sources.length})` : ''}</span>
+        </h2>
         <ul className="source-list">
           {sources.length > 0 ? (
             sources.map(([id, source]) => (
               <li key={id} className="source-item">
-                <div className="source-info">
+                <div 
+                  className="source-info clickable"
+                  onClick={() => handleOpenSource(source.url)}
+                  title="Click to open in new tab"
+                >
                   <span className="source-title">{source.title}</span>
                   <span className="source-url">{source.url}</span>
                 </div>

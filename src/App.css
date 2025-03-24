@@ -14,10 +14,11 @@ body {
 
 .app-container {
   width: 400px;
-  max-height: 600px;
-  overflow: auto;
-  padding: 0;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
   background-color: #fff;
+  overflow: hidden;
 }
 
 /* Header */
@@ -28,6 +29,7 @@ body {
   padding: 15px 20px;
   border-bottom: 1px solid #e0e0e0;
   background-color: #fff;
+  flex-shrink: 0;
 }
 
 .logo-container {
@@ -201,18 +203,35 @@ input:checked + .slider:before {
 /* Sources Section */
 .sources-section {
   padding: 15px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .sources-section h2 {
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sources-count {
+  font-size: 14px;
+  color: #777;
+  font-weight: normal;
 }
 
 .source-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  max-height: calc(100% - 30px);
 }
 
 .source-item {
@@ -226,6 +245,25 @@ input:checked + .slider:before {
 .source-info {
   flex: 1;
   overflow: hidden;
+}
+
+.source-info.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.source-info.clickable:hover {
+  background-color: #f5f5f5;
+}
+
+.source-info.clickable .source-title {
+  color: #004d40;
+}
+
+.source-info.clickable:hover .source-title {
+  text-decoration: underline;
 }
 
 .source-title {
