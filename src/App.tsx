@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { NotebookLMService } from './services/notebookLM/notebookService'
+import { NotebookLMService } from './services/notebookLM/basicService'
 
 /// <reference types="chrome"/>
 
@@ -28,6 +28,7 @@ function App() {
   const [sources, setSources] = useState<[string, Source][]>([])
   const [isAddingSource, setIsAddingSource] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
+  const notebookService = new NotebookLMService()
 
   // Load initial data from storage
   useEffect(() => {
@@ -185,11 +186,10 @@ function App() {
     }
 
     setIsSyncing(true);
-    const notebookLMService = new NotebookLMService();
 
     try {
       for (const [_, source] of sources) {
-        await notebookLMService.addSource({
+        await notebookService.addSource({
           url: source.url,
           title: source.title
         });
@@ -198,6 +198,21 @@ function App() {
     } catch (error) {
       console.error('Error syncing to NotebookLM:', error);
       alert('Error syncing to NotebookLM. Check console for details.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleAddSource = async () => {
+    try {
+      setIsSyncing(true);
+      // For testing, we'll use a hardcoded URL
+      await notebookService.addSource({
+        url: "https://example.com",
+        title: "Test Source"
+      });
+    } catch (error) {
+      console.error("Failed to add source:", error);
     } finally {
       setIsSyncing(false);
     }
@@ -322,6 +337,14 @@ function App() {
       <div className="version-info">
         <span>v1.0.0-beta.45</span>
       </div>
+
+      <button 
+        onClick={handleAddSource}
+        disabled={isSyncing}
+        className="add-button"
+      >
+        {isSyncing ? 'Adding...' : 'Add Source'}
+      </button>
     </div>
   )
 }

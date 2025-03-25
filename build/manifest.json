@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Athena",
-    "version": "0.0.1.4",
-    "description": "A tool for NotebookLM",
+    "version": "0.0.1.5",
+    "description": "A tool for NotebookLM - working add button for links only",
     "action": {
       "default_popup": "index.html",
       "default_icon": {

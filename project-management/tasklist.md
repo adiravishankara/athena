@@ -72,21 +72,22 @@
 - [ ] Optimize performance for handling large numbers of sources
 
 ## Notebook Integration
-- [ ] Phase 1: Basic Source Sync Implementation
-  - [x] Update manifest.json with required permissions
-  - [x] Create NotebookLMService with basic functionality
-    - [x] Implement waitForTabLoad utility
-    - [x] Implement createNewNotebook function
-    - [x] Implement addSourceToNotebook function
-  - [x] Add sync button to extension UI
-  - [ ] Test basic sync functionality
-- [ ] Phase 2: Notebook Management (Future)
-  - [ ] Implement function to retrieve notebook names and IDs
-  - [ ] Add notebook selection functionality
-  - [ ] Update UI to show available notebooks
-- [ ] Update extension UI to display actual NotebookLM notebooks
-  - [ ] Modify notebook selection dropdown to show real NotebookLM notebooks
-  - [ ] Add refresh button to update notebook list
+
+### Phase 1: Basic Source Sync (Current)
+- [x] Update manifest.json with required permissions
+- [x] Create NotebookLMService
+- [x] Add sync button to extension UI
+- [ ] Debug Source Addition
+  - [ ] Create "Add" button in extension
+  - [ ] Implement simple click handler for "Add source" button in NotebookLM
+  - [ ] Add website URL to notebook
+  - [ ] Test and verify basic functionality
+
+### Phase 2: Enhanced Features (Future)
+- [ ] Implement notebook management
+- [ ] Add error handling and retry logic
+- [ ] Add progress indicators
+- [ ] Add success/failure notifications
 
 ## BraveSearch API Integration
 - [ ] Extract keywords from notebook entries using NLP
