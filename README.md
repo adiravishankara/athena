@@ -1,54 +1,106 @@
-# React + TypeScript + Vite
+# NotebookLM Research Assistant Chrome Extension
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Project Banner](path/to/your/banner.png) <!-- Optional: Add a banner image -->
 
-Currently, two official plugins are available:
+A Chrome Extension designed to streamline adding sources to Google NotebookLM notebooks during research. Automates manual tasks and integrates intelligent suggestions to enhance research efficiency.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Research Mode Toggle**: Switch seamlessly between research mode and regular browsing.
+- **Notebook Selection**: Create or select notebooks directly within the extension.
+- **Persistent On-Screen Tool**: Draggable icon for quick source addition.
+- **Smart Source Suggestions** (Planned): Future integration with BraveSearch API for context-aware recommendations.
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ❓ Why We Built This
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Research often involves tedious manual tasks like copying and pasting URLs. This extension automates source collection, allowing researchers to focus on their work. Key motivations include:
+- Eliminating repetitive workflows.
+- Providing a unified tool for notebook management.
+- Preparing for AI-powered suggestions to accelerate discovery.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+---
+
+## 📦 Installation
+
+### Load the Extension in Chrome
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/athena.git
+   cd athena
+
+Install dependencies:
+
+bash
+Copy
+npm install
+Build the project:
+
+bash
+Copy
+npm run build
+Load into Chrome:
+
+Navigate to chrome://extensions/.
+
+Enable Developer Mode (toggle in top-right).
+
+Click Load Unpacked and select the dist folder.
+
+🛠️ Usage
+Open the Extension:
+
+Click the extension icon in the Chrome toolbar.
+
+Activate Research Mode:
+
+Toggle Research Mode ON to enable source tools.
+
+Select a Notebook:
+
+Choose an existing notebook or create a new one.
+
+Add Sources:
+
+Click the persistent on-screen icon to save the current page URL to your notebook.
+
+Demo GIF <!-- Replace with actual demo GIF -->
+
+🗺️ Roadmap
+✅ Completed
+Initial extension prototype
+
+Research mode toggle
+
+Basic notebook selection
+
+🚧 In Progress
+Notebook management UI
+
+Error handling for API calls
+
+📅 Planned
+BraveSearch API Integration: Intelligent source suggestions.
+
+Multi-Source Support: Save highlights/text snippets.
+
+Cross-Browser Support: Firefox and Edge versions.
+
+Roadmap <!-- Replace with roadmap graphic -->
+
+🤝 Contributing
+We welcome contributions! Please review:
+
+Code of Conduct
+
+Contributing Guidelines
+
+📜 License
+MIT License. See LICENSE for details.
+
+Made with ❤️ by Adi. Questions? Open an issue.
+
