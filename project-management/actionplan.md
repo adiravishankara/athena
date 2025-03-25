@@ -1,40 +1,74 @@
 # Action Plan for NotebookLM Integration
 
-## Repository Analysis
-The repository pHo9UBenaA/notebooklm-automation-alpha appears to be a Chrome extension that automates NotebookLM interactions using Chrome scripting APIs. However, I need more information about the specific implementation since I can't see the full source code, particularly:
+## Repository Implementation Analysis
+The repository uses Chrome's scripting API to automate NotebookLM interactions through DOM manipulation. Here's how it works:
 
-1. How does it access the NotebookLM dashboard?
-2. How does it extract notebook IDs and names?
-3. How does it handle the source addition process?
+1. **Command Listener Setup**
+   - Listens for keyboard shortcuts to trigger automation
+   - Uses `chrome.commands.onCommand.addListener`
 
-## Questions to Resolve
-1. Can you share the content of their `notebookService.ts` or similar file that handles NotebookLM interactions?
-2. Do they have any specific content scripts that inject code into the NotebookLM dashboard?
-3. What Chrome APIs are they using for scripting (e.g., chrome.scripting.executeScript)?
+2. **Main Automation Flow**
+   ```typescript
+   async function runAutomation() {
+     // 1. Get current tab URL
+     // 2. Open NotebookLM in new tab
+     // 3. Wait for page load
+     // 4. Click "Create New" button
+     // 5. Click "Website" button
+     // 6. Input URL and click "Insert"
+   }
+   ```
 
-## Preliminary Implementation Plan
-Based on the repository structure and available information:
+3. **DOM Interaction Methods**
+   - Uses multiple selector fallbacks for reliability
+   - Implements waiting periods between actions
+   - Handles errors gracefully
 
-1. **Service Layer**
-   - Create a NotebookLMService class to handle all NotebookLM interactions
-   - Implement methods for:
-     - Getting notebook list
-     - Adding sources to notebooks
-     - Error handling
+## Implementation Plan for Our Extension
 
-2. **Chrome Scripting**
-   - Use chrome.scripting.executeScript to inject code into NotebookLM
-   - Need to identify the correct selectors and DOM elements to interact with
+1. **Service Layer** (src/services/notebookLM/notebookService.ts)
+   - Create NotebookLMService class with methods:
+     - `getNotebooks()`: Get list of notebooks
+     - `addSource(url: string, notebookId: string)`
+     - `waitForTabLoad(tabId: number)`
+
+2. **DOM Interaction Functions** (src/services/notebookLM/domUtils.ts)
+   - Port their selector-based approach:
+     - `clickCreateNewButton()`
+     - `processWebsiteInput()`
+     - Add new function `getNotebookList()`
 
 3. **Integration Steps**
-   - Implement notebook list retrieval
-   - Implement source addition
-   - Update UI to use real NotebookLM data
+   1. Copy and adapt their Chrome scripting implementation
+   2. Add notebook list retrieval functionality
+   3. Modify UI to work with real NotebookLM notebooks
+
+## Required Changes to Current Extension
+1. Update manifest.json to include required permissions:
+   ```json
+   {
+     "permissions": [
+       "scripting",
+       "tabs",
+       "activeTab"
+     ],
+     "host_permissions": [
+       "https://notebooklm.google.com/*"
+     ]
+   }
+   ```
+
+2. Create new background script handlers
+3. Update existing UI components to work with NotebookLM
+
+## Questions Resolved
+- How does it access NotebookLM? → Uses chrome.scripting.executeScript
+- How does it handle interactions? → DOM manipulation with fallback selectors
+- Error handling? → Try-catch blocks and console logging
 
 ## Next Steps
-Before proceeding with implementation, we need:
-1. Access to their service implementation details
-2. Understanding of their DOM interaction approach
-3. Review of their Chrome scripting implementation
+1. Would you like me to start implementing these changes?
+2. Should we keep their keyboard shortcut functionality or stick with our current UI-based approach?
+3. Do you want to keep their console logging in Japanese or switch to English?
 
-Could you help provide access to these implementation details from the repository? 
+The implementation is very straightforward and well-structured. We can directly adapt their code to work with our extension's existing functionality. Would you like me to start with any particular component? 
