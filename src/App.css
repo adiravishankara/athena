@@ -367,3 +367,43 @@ input:checked + .slider:before {
 .add-button:hover:not(:disabled) {
   background-color: #3367d6;
 }
+
+/* NotebookLM Integration Section */
+.add-to-notebooklm-section {
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f8f8f8;
+}
+
+.add-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.add-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #3367d6;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #777;
+  margin-top: 8px;
+  text-align: center;
+}

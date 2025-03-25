@@ -77,17 +77,19 @@
 - [x] Update manifest.json with required permissions
 - [x] Create NotebookLMService
 - [x] Add sync button to extension UI
-- [ ] Debug Source Addition
-  - [ ] Create "Add" button in extension
-  - [ ] Implement simple click handler for "Add source" button in NotebookLM
-  - [ ] Add website URL to notebook
-  - [ ] Test and verify basic functionality
+- [x] Debug Source Addition
+  - [x] Create "Add" button in extension
+  - [x] Implement simple click handler for "Add source" button in NotebookLM
+  - [x] Add website URL to notebook
+  - [x] Test and verify basic functionality
+  - [x] Update to add sources from extension instead of current tab URL
 
 ### Phase 2: Enhanced Features (Future)
 - [ ] Implement notebook management
 - [ ] Add error handling and retry logic
 - [ ] Add progress indicators
 - [ ] Add success/failure notifications
+- [ ] Improve UI integration
 
 ## BraveSearch API Integration
 - [ ] Extract keywords from notebook entries using NLP

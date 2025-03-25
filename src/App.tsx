@@ -204,15 +204,27 @@ function App() {
   };
 
   const handleAddSource = async () => {
+    if (sources.length === 0) {
+      alert('No sources to add. Please add sources to your notebook first.');
+      return;
+    }
+
     try {
       setIsSyncing(true);
-      // For testing, we'll use a hardcoded URL
+      
+      // Use the first source from our extension's notebook
+      const [_, source] = sources[0];
+      
+      // Open NotebookLM and add the source
       await notebookService.addSource({
-        url: "https://example.com",
-        title: "Test Source"
+        url: source.url,
+        title: source.title
       });
+      
+      console.log("Successfully added source to NotebookLM:", source.url);
     } catch (error) {
       console.error("Failed to add source:", error);
+      alert("Failed to add source to NotebookLM. See console for details.");
     } finally {
       setIsSyncing(false);
     }
@@ -338,13 +350,17 @@ function App() {
         <span>v1.0.0-beta.45</span>
       </div>
 
-      <button 
-        onClick={handleAddSource}
-        disabled={isSyncing}
-        className="add-button"
-      >
-        {isSyncing ? 'Adding...' : 'Add Source'}
-      </button>
+      {/* Add to NotebookLM Button */}
+      <div className="add-to-notebooklm-section">
+        <button 
+          onClick={handleAddSource}
+          disabled={isSyncing || sources.length === 0}
+          className="add-button"
+        >
+          {isSyncing ? 'Adding to NotebookLM...' : 'Add First Source to NotebookLM'}
+        </button>
+        <p className="help-text">Opens NotebookLM and adds the first source from your notebook</p>
+      </div>
     </div>
   )
 }
