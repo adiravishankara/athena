@@ -214,10 +214,10 @@ function App() {
       
       // Tell the user how many sources we're going to add
       const totalSources = sources.length;
-      // alert(`Adding ${totalSources} sources to NotebookLM. This may take a while.`);
       
-      // Track successful and failed sources
+      // Track successful, skipped, and failed sources
       let successCount = 0;
+      let skippedCount = 0;
       let failedSources: string[] = [];
       
       // Add each source one by one
@@ -225,6 +225,19 @@ function App() {
         const [_, source] = sources[i];
         
         try {
+          // Check if this is a web link or another type
+          const url = source.url.toLowerCase();
+          const isGoogleDocs = url.includes('docs.google.com/document');
+          const isGoogleSlides = url.includes('docs.google.com/presentation') || url.includes('slides.google.com');
+          const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+          
+          // Skip non-web links for now
+          if (isGoogleDocs || isGoogleSlides || isYouTube) {
+            console.log(`Skipping non-web link (${i+1}/${totalSources}):`, source.url);
+            skippedCount++;
+            continue;
+          }
+          
           // Update the UI to show which source we're adding
           setIsSyncing(true); // Make sure the button stays disabled
           
@@ -250,7 +263,9 @@ function App() {
       }
       
       // Show a completion message
-      if (failedSources.length === 0) {
+      if (skippedCount > 0) {
+        alert(`Added ${successCount} website sources to NotebookLM. Skipped ${skippedCount} non-web sources (Google Docs, Slides, YouTube). ${failedSources.length} sources failed.`);
+      } else if (failedSources.length === 0) {
         alert(`Successfully added all ${successCount} sources to NotebookLM!`);
       } else {
         alert(`Added ${successCount} out of ${totalSources} sources to NotebookLM. ${failedSources.length} sources failed.`);
@@ -390,9 +405,9 @@ function App() {
           disabled={isSyncing || sources.length === 0}
           className="add-button"
         >
-          {isSyncing ? 'Adding to NotebookLM...' : 'Add All Sources to NotebookLM'}
+          {isSyncing ? 'Adding to NotebookLM...' : 'Add Website Sources to NotebookLM'}
         </button>
-        <p className="help-text">Opens NotebookLM and adds all sources from your notebook</p>
+        <p className="help-text">Adds website links from your notebook to NotebookLM (skips Google Docs, Slides, YouTube)</p>
       </div>
     </div>
   )
