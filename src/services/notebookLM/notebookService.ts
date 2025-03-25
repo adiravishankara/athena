@@ -20,11 +20,21 @@ export class NotebookLMService {
 
       await waitForTabLoad(tab.id);
       // Add extra delay to ensure the UI is fully rendered
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
       console.log("NotebookLM opened successfully, tab ID:", tab.id);
       return tab.id;
     } catch (error) {
       console.error("Error opening NotebookLM:", error);
+      throw error;
+    }
+  }
+  private async openInspectBar(tabId: number): Promise<void> {
+    try {
+      console.log("Opening inspect bar and console for tab ID:", tabId);
+      await chrome.tabs.executeScript(tabId, { code: 'window.open("chrome://inspect", "_self");' });
+      console.log("Inspect bar and console opened successfully.");
+    } catch (error) {
+      console.error("Error opening inspect bar and console:", error);
       throw error;
     }
   }
@@ -232,6 +242,7 @@ export class NotebookLMService {
     try {
       console.log("Adding source:", source);
       const tabId = await this.openNotebookLM();
+      await this.openInspectBar(tabId);
       await this.clickCreateNewButton(tabId);
       await this.addWebsiteSource(tabId, source.url);
       console.log("Successfully added source to NotebookLM");
