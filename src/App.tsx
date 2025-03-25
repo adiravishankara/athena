@@ -212,19 +212,52 @@ function App() {
     try {
       setIsSyncing(true);
       
-      // Use the first source from our extension's notebook
-      const [_, source] = sources[0];
+      // Tell the user how many sources we're going to add
+      const totalSources = sources.length;
+      // alert(`Adding ${totalSources} sources to NotebookLM. This may take a while.`);
       
-      // Open NotebookLM and add the source
-      await notebookService.addSource({
-        url: source.url,
-        title: source.title
-      });
+      // Track successful and failed sources
+      let successCount = 0;
+      let failedSources: string[] = [];
       
-      console.log("Successfully added source to NotebookLM:", source.url);
+      // Add each source one by one
+      for (let i = 0; i < sources.length; i++) {
+        const [_, source] = sources[i];
+        
+        try {
+          // Update the UI to show which source we're adding
+          setIsSyncing(true); // Make sure the button stays disabled
+          
+          // Open NotebookLM and add the source
+          await notebookService.addSource({
+            url: source.url,
+            title: source.title
+          });
+          
+          // Increment success counter
+          successCount++;
+          
+          console.log(`Added source ${i+1}/${totalSources} to NotebookLM:`, source.url);
+          
+          // Small delay between sources to avoid overwhelming NotebookLM
+          if (i < sources.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        } catch (error) {
+          console.error(`Failed to add source ${i+1}/${totalSources}:`, source.url, error);
+          failedSources.push(source.url);
+        }
+      }
+      
+      // Show a completion message
+      if (failedSources.length === 0) {
+        alert(`Successfully added all ${successCount} sources to NotebookLM!`);
+      } else {
+        alert(`Added ${successCount} out of ${totalSources} sources to NotebookLM. ${failedSources.length} sources failed.`);
+      }
     } catch (error) {
-      console.error("Failed to add source:", error);
-      alert("Failed to add source to NotebookLM. See console for details.");
+      console.error("Failed to add sources:", error);
+      alert("Failed to add sources to NotebookLM. See console for details.");
     } finally {
       setIsSyncing(false);
     }
@@ -357,9 +390,9 @@ function App() {
           disabled={isSyncing || sources.length === 0}
           className="add-button"
         >
-          {isSyncing ? 'Adding to NotebookLM...' : 'Add First Source to NotebookLM'}
+          {isSyncing ? 'Adding to NotebookLM...' : 'Add All Sources to NotebookLM'}
         </button>
-        <p className="help-text">Opens NotebookLM and adds the first source from your notebook</p>
+        <p className="help-text">Opens NotebookLM and adds all sources from your notebook</p>
       </div>
     </div>
   )

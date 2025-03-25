@@ -83,6 +83,7 @@
   - [x] Add website URL to notebook
   - [x] Test and verify basic functionality
   - [x] Update to add sources from extension instead of current tab URL
+  - [x] Enhance to add all sources from notebook instead of just the first one
 
 ### Phase 2: Enhanced Features (Future)
 - [ ] Implement notebook management
