@@ -72,12 +72,18 @@
 - [ ] Optimize performance for handling large numbers of sources
 
 ## Notebook Integration
-- [ ] Implement NotebookLM integration using Chrome scripting
-  - [ ] Create service for interacting with NotebookLM dashboard
-  - [ ] Implement function to retrieve notebook names and IDs from NotebookLM dashboard
-  - [ ] Add functionality to add sources to specific NotebookLM notebooks
-  - [ ] Implement error handling for NotebookLM operations
-  - [ ] Create a background script to handle communication with NotebookLM
+- [ ] Phase 1: Basic Source Sync Implementation
+  - [x] Update manifest.json with required permissions
+  - [x] Create NotebookLMService with basic functionality
+    - [x] Implement waitForTabLoad utility
+    - [x] Implement createNewNotebook function
+    - [x] Implement addSourceToNotebook function
+  - [x] Add sync button to extension UI
+  - [ ] Test basic sync functionality
+- [ ] Phase 2: Notebook Management (Future)
+  - [ ] Implement function to retrieve notebook names and IDs
+  - [ ] Add notebook selection functionality
+  - [ ] Update UI to show available notebooks
 - [ ] Update extension UI to display actual NotebookLM notebooks
   - [ ] Modify notebook selection dropdown to show real NotebookLM notebooks
   - [ ] Add refresh button to update notebook list

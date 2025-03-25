@@ -1,33 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import { NotebookLMService } from './services/notebookLM/notebookService'
 
-// Type declarations for Chrome API
-declare global {
-  interface Window {
-    chrome: {
-      storage: {
-        local: {
-          get: (keys: string[], callback: (result: any) => void) => void;
-          set: (items: object, callback?: () => void) => void;
-        };
-        onChanged: {
-          addListener: (callback: (changes: any, namespace: string) => void) => void;
-        };
-      };
-      runtime: {
-        sendMessage: (message: any, callback?: (response: any) => void) => void;
-      };
-      tabs: {
-        query: (queryInfo: {active: boolean, currentWindow: boolean}, 
-                callback: (tabs: {id: number, url: string, title: string}[]) => void) => void;
-        create: (createProperties: {url: string, active?: boolean}, callback?: (tab: any) => void) => void;
-      };
-    };
-  }
-}
-
-// Use the chrome API from the window object
-const chrome = window.chrome;
+/// <reference types="chrome"/>
 
 interface Source {
   url: string;
@@ -52,6 +27,7 @@ function App() {
   const [newNotebookName, setNewNotebookName] = useState('')
   const [sources, setSources] = useState<[string, Source][]>([])
   const [isAddingSource, setIsAddingSource] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
 
   // Load initial data from storage
   useEffect(() => {
@@ -201,6 +177,32 @@ function App() {
     chrome.tabs.create({ url, active: false });
   }
 
+  // Sync current notebook to NotebookLM
+  const handleSyncToNotebookLM = async () => {
+    if (sources.length === 0) {
+      alert('No sources to sync');
+      return;
+    }
+
+    setIsSyncing(true);
+    const notebookLMService = new NotebookLMService();
+
+    try {
+      for (const [_, source] of sources) {
+        await notebookLMService.addSource({
+          url: source.url,
+          title: source.title
+        });
+      }
+      alert('Successfully synced sources to NotebookLM');
+    } catch (error) {
+      console.error('Error syncing to NotebookLM:', error);
+      alert('Error syncing to NotebookLM. Check console for details.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -224,7 +226,16 @@ function App() {
 
       {/* Notebook Selection */}
       <div className="notebook-section">
-        <h2>Notebook</h2>
+        <div className="notebook-header">
+          <h2>Notebook</h2>
+          <button 
+            onClick={handleSyncToNotebookLM}
+            disabled={isSyncing || sources.length === 0}
+            className="sync-button"
+          >
+            {isSyncing ? 'Syncing...' : 'Sync to NotebookLM'}
+          </button>
+        </div>
         {isCreatingNotebook ? (
           <div className="create-notebook">
             <input
