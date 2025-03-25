@@ -72,56 +72,15 @@
 - [ ] Optimize performance for handling large numbers of sources
 
 ## Notebook Integration
-
-### Source Addition Implementation
-- [ ] Setup Chrome Scripting Integration
-  - [ ] Add necessary permissions to manifest.json
-  - [ ] Create content script utilities
-  - [ ] Setup debugging infrastructure
-  - [ ] Add screenshot capture for debugging
-
-- [ ] Implement Source Addition Flow
-  - [ ] Create function to open NotebookLM
-  - [ ] Implement robust element selector system
-    - [ ] Create selectors for "Create New" button
-    - [ ] Create selectors for source type buttons
-    - [ ] Create selectors for URL input
-    - [ ] Create selectors for submit buttons
-  - [ ] Add URL input automation
-  - [ ] Handle different source types (Website/YouTube)
-  - [ ] Implement submission and confirmation
-  - [ ] Add success/error detection
-
-- [ ] Session Management
-  - [ ] Add logic to detect NotebookLM session status
-  - [ ] Implement session refresh by opening NotebookLM
-  - [ ] Add session validation
-  - [ ] Handle authentication errors
-
-- [ ] Error Handling & Recovery
-  - [ ] Add retry logic for failed element selections
-  - [ ] Implement timeout handling
-  - [ ] Add rate limiting protection
-  - [ ] Create error reporting system
-
-### Testing Infrastructure
-- [ ] Setup Test Environment
-  - [ ] Create test configuration system
-  - [ ] Implement dry run mode
-  - [ ] Add debug logging
-  - [ ] Setup test data fixtures
-
-- [ ] Implement Test Suites
-  - [ ] Create website URL tests
-  - [ ] Add YouTube URL tests
-  - [ ] Implement Google Drive tests
-  - [ ] Add error case tests
-
-- [ ] Create Monitoring System
-  - [ ] Add performance tracking
-  - [ ] Implement error logging
-  - [ ] Create status reporting
-  - [ ] Setup alert system
+- [ ] Implement NotebookLM integration using Chrome scripting
+  - [ ] Create service for interacting with NotebookLM dashboard
+  - [ ] Implement function to retrieve notebook names and IDs from NotebookLM dashboard
+  - [ ] Add functionality to add sources to specific NotebookLM notebooks
+  - [ ] Implement error handling for NotebookLM operations
+  - [ ] Create a background script to handle communication with NotebookLM
+- [ ] Update extension UI to display actual NotebookLM notebooks
+  - [ ] Modify notebook selection dropdown to show real NotebookLM notebooks
+  - [ ] Add refresh button to update notebook list
 
 ## BraveSearch API Integration
 - [ ] Extract keywords from notebook entries using NLP

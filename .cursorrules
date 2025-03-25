@@ -1,6 +1,8 @@
 # Development Guidelines
 
 You dont need to run any tools for this project such as building. I can manage that.
+Also you are running on windows 11, with powershell Tune your commands for that. 
+Always feel free to research if there are existing libraries and solutions you can use first, before suggesting writing code yourself. I can help you decide what to do in these cases. 
 
 ## Software Development Process
 - Always follow the software development process:

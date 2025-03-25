@@ -3,7 +3,7 @@
 | Milestone                     | Description                                         | Achieved |
 |-------------------------------|-----------------------------------------------------|----------|
 | Initial Extension Prototype   | Basic UI, Research Mode toggle, persistent icon     |x|
-| Notebook Integration          | Implement HTTP request simulation or Playwright     | |
+| Notebook Integration          | Implement NotebookLM integration using Chrome scripting |IN PROGRESS |
 | BraveSearch API Integration   | Add intelligent source suggestions                  | |
 | Final Testing & Deployment    | QA testing, bug fixes, publish on Chrome Store      | | 
 
@@ -17,4 +17,6 @@
 
 ### Next Steps
 - Test the extension thoroughly to verify all functionality works as expected
-- Begin implementing Notebook Integration by reverse-engineering NotebookLM requests 
+- Begin implementing Notebook Integration using Chrome scripting to:
+  - Retrieve notebook names and IDs from NotebookLM dashboard
+  - Add sources to specific NotebookLM notebooks 
