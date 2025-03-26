@@ -1,4 +1,5 @@
 // background.js
+import { normalizeYouTubeUrl, getLinkType } from './utils/urlUtils';
 
 console.log("Background script loaded");
 
@@ -18,7 +19,6 @@ function injectFloatingButton(tabId) {
       const currentNotebook = result.currentNotebook;
       const notebooks = result.notebooks || {};
       let isUrlSaved = false;
-      let isYouTube = false;
       
       // Check if URL is already saved in current notebook
       if (currentNotebook && notebooks[currentNotebook] && notebooks[currentNotebook].sources) {
@@ -34,7 +34,7 @@ function injectFloatingButton(tabId) {
       }
 
       // Check if current URL is a YouTube URL
-      isYouTube = url.toLowerCase().includes('youtube.com') || url.toLowerCase().includes('youtu.be');
+      const isYouTube = getLinkType(url) === 'youtube';
       
       // Inject the floating button
       chrome.scripting.executeScript({

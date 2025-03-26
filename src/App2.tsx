@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { NotebookLMService } from "./services/notebookLM/basicService";
+import { getLinkType } from './utils/urlUtils';
 
 /// <reference types="chrome"/>
 
@@ -28,6 +29,12 @@ interface NotebookData {
 
 interface Notebooks {
     [notebookName: string]: NotebookData;
+}
+
+interface MessageResponse {
+    status: 'success' | 'error';
+    error?: string;
+    data?: any;
 }
 
 function App() {
@@ -155,7 +162,7 @@ function App() {
     }
 
     // This function is used to add the current tab as a source
-    const handleAddCurrentTab = () => { 
+    const handleAddCurrentTab = async () => {
         if (!currentNotebook) {
             alert('Please select a notebook first');
             return;
@@ -163,51 +170,38 @@ function App() {
 
         setIsAddingSource(true);
 
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length === 0) {
-                setIsAddingSource(false);
-                alert('No active tab found');
-                return;
-            }
+        try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab.url && tab.title) {
+                const url = tab.url;
+                const title = tab.title;
+                const linkType = getLinkType(url);
+                
+                // Add the source using chrome.runtime.sendMessage
+                const response = await new Promise<MessageResponse>((resolve) => {
+                    chrome.runtime.sendMessage({
+                        action: 'ADD_SOURCE',
+                        url,
+                        title,
+                        type: linkType,
+                        datetime: new Date().toISOString()
+                    }, resolve);
+                });
 
-            const currentTab = tabs[0];
-            if (!currentTab.url) {
-                setIsAddingSource(false);
-                alert('No URL found for current tab');
-                return;
-            }
-
-            const url = currentTab.url.toLowerCase(); // Convert URL to lowercase for easier comparison
-
-            // Determine the type of link
-            let linkType = 'web'; // Default to 'web'
-            if (url.includes('docs.google.com/document')) {
-                linkType = 'googledocs';
-            } else if (url.includes('docs.google.com/presentation') || url.includes('slides.google.com')) {
-                linkType = 'googleslides';
-            } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                linkType = 'youtube';
-            } else if (url.endsWith('.pdf')) {
-                linkType = 'pdf';
-            }
-
-            chrome.runtime.sendMessage({
-                action: 'ADD_SOURCE',
-                url: currentTab.url,
-                title: currentTab.title,
-                type: linkType,
-                datetime: new Date().toISOString(),
-                added_to_notebook: false
-            }, (response) => {
-                setIsAddingSource(false);
                 if (response.status === 'success') {
                     console.log('Source Added:', response);
                 } else {
                     alert(`Error: ${response.error}`);
                 }
-            });
-        });
-    }
+            }
+        } catch (error) {
+            console.error('Error adding current tab:', error);
+            alert('Failed to add current tab');
+        } finally {
+            setIsAddingSource(false);
+        }
+    };
+
     // This function handles opening a source URL in a new tab
     const handleOpenSource = (url: string) => {
         chrome.tabs.create({ url, active: false });

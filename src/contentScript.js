@@ -1,4 +1,5 @@
 // contentScript.js
+import { getLinkType, getYouTubeVideoId } from './utils/urlUtils';
 
 // This script checks if research mode is active and injects the floating button if it is
 console.log("Content script loaded");
@@ -92,24 +93,16 @@ function injectFloatingButton() {
       const url = window.location.href;
       const title = document.title;
       
-      // Enhanced YouTube URL detection
-      let linkType = 'web';
-      const lowerUrl = url.toLowerCase();
+      // Use shared utility for link type detection
+      const linkType = getLinkType(url);
       
-      if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be')) {
-        linkType = 'youtube';
-        // Extract video ID and validate YouTube URL
+      // Special handling for YouTube URLs
+      if (linkType === 'youtube') {
         const videoId = getYouTubeVideoId(url);
         if (!videoId) {
           showToast("Invalid YouTube URL", true);
           return;
         }
-      } else if (lowerUrl.includes('docs.google.com/document')) {
-        linkType = 'googledocs';
-      } else if (lowerUrl.includes('docs.google.com/presentation') || lowerUrl.includes('slides.google.com')) {
-        linkType = 'googleslides';
-      } else if (lowerUrl.endsWith('.pdf')) {
-        linkType = 'pdf';
       }
       
       try {
@@ -143,21 +136,6 @@ function injectFloatingButton() {
   });
 
   document.body.appendChild(button);
-}
-
-// Helper function to extract YouTube video ID
-function getYouTubeVideoId(url) {
-  try {
-    const urlObj = new URL(url);
-    if (urlObj.hostname.includes('youtube.com')) {
-      return urlObj.searchParams.get('v');
-    } else if (urlObj.hostname.includes('youtu.be')) {
-      return urlObj.pathname.substring(1);
-    }
-  } catch (e) {
-    console.error('Error parsing YouTube URL:', e);
-  }
-  return null;
 }
 
 // Function to remove the floating button
