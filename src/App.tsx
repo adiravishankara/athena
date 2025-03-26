@@ -7,7 +7,7 @@ import { NotebookLMService } from './services/notebookLM/basicService'
 interface Source {
   url: string;
   title: string;
-  type: string;
+  linkType: string;
   added_datetime: string;
 }
 
@@ -232,29 +232,44 @@ function App() {
           const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
           
           // Skip non-web links for now
-          if (isGoogleDocs || isGoogleSlides || isYouTube) {
+          if (isGoogleDocs || isGoogleSlides) {
             console.log(`Skipping non-web link (${i+1}/${totalSources}):`, source.url);
             skippedCount++;
             continue;
           }
+          setIsSyncing(true);
           
-          // Update the UI to show which source we're adding
-          setIsSyncing(true); // Make sure the button stays disabled
+          // Handle YouTube links
+          if (isYouTube) {
+            try {
+              // Click the YouTube button in NotebookLM
+              await notebookService.addSource({
+                url: source.url,
+                title: source.title,
+                // linkType: 'youtube' // Specify the type as YouTube
+              });
+              successCount++;
+              console.log(`Added YouTube video (${i+1}/${totalSources}):`, source.url);
+            } catch (error) {
+              console.error(`Failed to add YouTube video (${i+1}/${totalSources}):`, error);
+              failedSources.push(source.url);
+            }
+            continue;
+          }
           
-          // Open NotebookLM and add the source
+          // Handle regular web links
           await notebookService.addSource({
             url: source.url,
-            title: source.title
+            title: source.title,
+            // linkType: 'web'
           });
           
-          // Increment success counter
           successCount++;
-          
           console.log(`Added source ${i+1}/${totalSources} to NotebookLM:`, source.url);
           
           // Small delay between sources to avoid overwhelming NotebookLM
           if (i < sources.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 500));
           }
         } catch (error) {
           console.error(`Failed to add source ${i+1}/${totalSources}:`, source.url, error);
@@ -264,7 +279,7 @@ function App() {
       
       // Show a completion message
       if (skippedCount > 0) {
-        alert(`Added ${successCount} website sources to NotebookLM. Skipped ${skippedCount} non-web sources (Google Docs, Slides, YouTube). ${failedSources.length} sources failed.`);
+        alert(`Added ${successCount} website sources to NotebookLM. Skipped ${skippedCount} non-web sources (Google Docs, Slides). ${failedSources.length} sources failed.`);
       } else if (failedSources.length === 0) {
         alert(`Successfully added all ${successCount} sources to NotebookLM!`);
       } else {
