@@ -67,6 +67,14 @@
   - [x] Make only the included sources section scrollable
   - [x] Add a counter to show the number of sources in a notebook
   - [x] Make source links clickable to open in new tabs
+
+- [x] Optimize the Application structure
+  - [x] Rewrite App.tsx to App2.tsx with improved organization
+  - [x] Add source type detection for different link types (YouTube, website, PDF, Google Docs, Google Slides)
+  - [x] Add visual indicators (color badges) for different source types in the UI
+  - [x] Fix NotebookLM service integration and sync functionality
+  - [ ] change the added_to_notebook functionality so that we can skip on next times
+
 - [ ] Test the extension in Chrome to verify all functionality works correctly
 - [ ] Fix any bugs or issues found during testing
 - [ ] Optimize performance for handling large numbers of sources

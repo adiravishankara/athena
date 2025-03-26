@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Athena",
-    "version": "0.0.1.6",
-    "description": "A tool for NotebookLM - working add button for links only, using included links",
+    "version": "0.0.1.7",
+    "description": "A tool for NotebookLM - working on badges, and adding youtube links",
     "action": {
       "default_popup": "index.html",
       "default_icon": {

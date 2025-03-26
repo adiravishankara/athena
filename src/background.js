@@ -403,6 +403,47 @@ function toggleResearchMode(enabled) {
   });
 }
 
+// Handle updating source sync status
+function updateSourceSyncStatus(request, sender, sendResponse) {
+  const { notebookName, sourceId, added_to_notebook } = request;
+
+  chrome.storage.local.get(['notebooks'], (result) => {
+    const notebooks = result.notebooks || {};
+    
+    // Check if notebook exists and has the source
+    if (!notebooks[notebookName] || !notebooks[notebookName][sourceId]) {
+      sendResponse({ status: 'error', error: 'Source not found' });
+      return;
+    }
+    
+    // Update the sync status
+    notebooks[notebookName][sourceId].added_to_notebook = added_to_notebook;
+    
+    // Update last sync datetime if we're marking as synced
+    if (added_to_notebook) {
+      // If the notebook doesn't have last_sync_datetime property, add it
+      if (!notebooks[notebookName].last_sync_datetime) {
+        // Create a new property for the notebook
+        Object.defineProperty(notebooks[notebookName], 'last_sync_datetime', {
+          value: new Date().toISOString(),
+          writable: true,
+          enumerable: true,
+          configurable: true
+        });
+      } else {
+        notebooks[notebookName].last_sync_datetime = new Date().toISOString();
+      }
+    }
+    
+    // Save the updated notebooks
+    chrome.storage.local.set({ notebooks }, () => {
+      sendResponse({ status: 'success', data: { notebookName, sourceId, added_to_notebook } });
+    });
+  });
+  
+  return true; // Indicates that sendResponse will be called asynchronously
+}
+
 // Listener for messages from the frontend and content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('Message received:', request);
@@ -457,6 +498,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     toggleResearchMode(request.enabled)
       .then(result => sendResponse({ status: 'success', data: result }))
       .catch(error => sendResponse({ status: 'error', error: error.message }));
+    return true;
+  }
+
+  if (request.action === 'UPDATE_SOURCE_SYNC_STATUS') {
+    updateSourceSyncStatus(request, sender, sendResponse);
     return true;
   }
 });
