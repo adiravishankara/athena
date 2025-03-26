@@ -18,175 +18,109 @@ function injectFloatingButton(tabId) {
       const currentNotebook = result.currentNotebook;
       const notebooks = result.notebooks || {};
       let isUrlSaved = false;
-      let notebookWithUrl = null;
+      let isYouTube = false;
       
-      // Check if URL is already saved in any notebook
-      if (currentNotebook && notebooks[currentNotebook]) {
-        // Check if the URL is already in the current notebook
-        Object.values(notebooks[currentNotebook]).forEach((source) => {
-          if (source.url === url) {
+      // Check if URL is already saved in current notebook
+      if (currentNotebook && notebooks[currentNotebook] && notebooks[currentNotebook].sources) {
+        // Check if the URL is already in the current notebook's sources
+        Object.values(notebooks[currentNotebook].sources).forEach((source) => {
+          // Normalize YouTube URLs for comparison
+          const normalizedUrl = normalizeYouTubeUrl(url);
+          const normalizedSourceUrl = normalizeYouTubeUrl(source.url);
+          if (normalizedUrl === normalizedSourceUrl) {
             isUrlSaved = true;
           }
         });
       }
+
+      // Check if current URL is a YouTube URL
+      isYouTube = url.toLowerCase().includes('youtube.com') || url.toLowerCase().includes('youtu.be');
       
       // Inject the floating button
       chrome.scripting.executeScript({
         target: { tabId: tabId },
-        function: (isAlreadySaved) => {
+        function: (params) => {
+          const { isAlreadySaved, isYouTube } = params;
           // This function runs in the context of the web page
           // Check if the button already exists
-          if (document.getElementById("athena-floating-button")) return;
+          if (document.getElementById("athena-floating-button")) {
+            // Update existing button state if needed
+            const existingButton = document.getElementById("athena-floating-button");
+            existingButton.innerHTML = isAlreadySaved ? "✓" : "+";
+            existingButton.style.background = isAlreadySaved ? "#2e7d32" : "#004d40";
+            return;
+          }
           
           const button = document.createElement("div");
           button.id = "athena-floating-button";
           button.innerHTML = isAlreadySaved ? "✓" : "+";
-          button.style.position = "fixed !important";
-          button.style.bottom = "50% !important"; // Center vertically
-          button.style.right = "20px !important";
-          button.style.transform = "translateY(50%) !important"; // Center adjustment
-          button.style.background = isAlreadySaved ? "#2e7d32 !important" : "#004d40 !important";
-          button.style.color = "white !important";
-          button.style.width = "40px !important"; // Fixed width
-          button.style.height = "40px !important"; // Fixed height
-          button.style.padding = "0 !important"; // Remove padding
-          button.style.borderRadius = "50% !important";
-          button.style.fontSize = "24px !important"; // Fixed font size
-          button.style.fontWeight = "bold !important";
-          button.style.cursor = "pointer !important";
-          button.style.zIndex = "2147483647 !important"; // Maximum z-index value
-          button.style.boxShadow = "0 4px 8px rgba(0,0,0,0.4) !important";
-          button.style.display = "flex !important";
-          button.style.justifyContent = "center !important";
-          button.style.alignItems = "center !important";
-          button.style.lineHeight = "40px !important"; // Match height for centering
-          button.style.textAlign = "center !important";
-          button.style.fontFamily = "Arial, sans-serif !important"; // Prevent font inheritance
-          button.style.border = "none !important";
-          button.style.margin = "0 !important";
-          button.style.userSelect = "none !important"; // Prevent text selection
+          button.style.position = "fixed";
+          button.style.bottom = "50%";
+          button.style.right = "20px";
+          button.style.transform = "translateY(50%)";
+          button.style.background = isAlreadySaved ? "#2e7d32" : "#004d40";
+          button.style.color = "white";
+          button.style.width = "40px";
+          button.style.height = "40px";
+          button.style.padding = "0";
+          button.style.borderRadius = "50%";
+          button.style.fontSize = "24px";
+          button.style.fontWeight = "bold";
+          button.style.cursor = "pointer";
+          button.style.zIndex = "2147483647";
+          button.style.boxShadow = "0 4px 8px rgba(0,0,0,0.4)";
+          button.style.display = "flex";
+          button.style.justifyContent = "center";
+          button.style.alignItems = "center";
+          button.style.lineHeight = "40px";
+          button.style.textAlign = "center";
+          button.style.fontFamily = "Arial, sans-serif";
+          button.style.border = "none";
+          button.style.margin = "0";
+          button.style.userSelect = "none";
 
-          // Make the button draggable
-          let isDragging = false;
-          let offsetX, offsetY;
-
-          button.addEventListener('mousedown', function(e) {
-            isDragging = true;
-            offsetX = e.clientX - button.getBoundingClientRect().left;
-            offsetY = e.clientY - button.getBoundingClientRect().top;
-          });
-
-          document.addEventListener('mousemove', function(e) {
-            if (isDragging) {
-              const left = e.clientX - offsetX;
-              const top = e.clientY - offsetY;
-              
-              button.style.right = 'auto';
-              button.style.bottom = 'auto';
-              button.style.left = left + 'px';
-              button.style.top = top + 'px';
-            }
-          });
-
-          document.addEventListener('mouseup', function() {
-            isDragging = false;
-          });
-
-          // Add click handler to save the current URL
-          button.addEventListener('click', function(e) {
-            if (!isDragging) {
-              if (isAlreadySaved) {
-                // If the URL is already saved, show a message
-                const toast = document.createElement("div");
-                toast.textContent = "Already added to notebook";
-                toast.style.position = "fixed";
-                toast.style.bottom = "100px";
-                toast.style.right = "20px";
-                toast.style.backgroundColor = "rgba(46, 125, 50, 0.9)";
-                toast.style.color = "white";
-                toast.style.padding = "10px 15px";
-                toast.style.borderRadius = "4px";
-                toast.style.zIndex = "10001";
-                document.body.appendChild(toast);
-                
-                setTimeout(() => {
-                  toast.remove();
-                }, 2000);
-                
-                return;
-              }
-              
-              const url = window.location.href;
-              const title = document.title;
-              
-              chrome.runtime.sendMessage({
-                action: 'ADD_SOURCE',
-                url: url,
-                title: title,
-                type: 'web',
-                datetime: new Date().toISOString()
-              }, (response) => {
-                if (response && response.status === 'success') {
-                  // Visual feedback
-                  button.style.background = '#2e7d32 !important';
-                  button.innerHTML = "✓";
-                  
-                  // Don't change back to + since it's now saved
-                  isAlreadySaved = true;
-                } else {
-                  // Show error toast
-                  const toast = document.createElement("div");
-                  toast.textContent = response && response.error ? response.error : "Failed to add to notebook";
-                  toast.style.position = "fixed";
-                  toast.style.bottom = "100px";
-                  toast.style.right = "20px";
-                  toast.style.backgroundColor = "rgba(211, 47, 47, 0.9)";
-                  toast.style.color = "white";
-                  toast.style.padding = "10px 15px";
-                  toast.style.borderRadius = "4px";
-                  toast.style.zIndex = "10001";
-                  document.body.appendChild(toast);
-                  
-                  setTimeout(() => {
-                    toast.remove();
-                  }, 2000);
-                }
-              });
-            }
-          });
+          // Add hover effect for YouTube videos
+          if (isYouTube) {
+            button.title = "Add YouTube video to notebook";
+            button.style.transition = "transform 0.2s ease-in-out";
+            button.addEventListener('mouseover', () => {
+              button.style.transform = "translateY(50%) scale(1.1)";
+            });
+            button.addEventListener('mouseout', () => {
+              button.style.transform = "translateY(50%) scale(1)";
+            });
+          }
 
           document.body.appendChild(button);
-          
-          // Create a MutationObserver to ensure button attributes stay consistent
-          const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-              if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                // Ensure the button style remains consistent
-                button.style.width = "40px !important";
-                button.style.height = "40px !important";
-                button.style.fontSize = "24px !important";
-                button.style.background = isAlreadySaved ? "#2e7d32 !important" : "#004d40 !important";
-                button.style.zIndex = "2147483647 !important";
-              } else if (mutation.type === 'childList' && mutation.target === button) {
-                // Ensure the button content remains consistent
-                button.innerHTML = isAlreadySaved ? "✓" : "+";
-              }
-            });
-          });
-          
-          // Start observing the button for attribute and content changes
-          observer.observe(button, { 
-            attributes: true,
-            attributeFilter: ['style'],
-            childList: true
-          });
         },
-        args: [isUrlSaved]
+        args: [{ isAlreadySaved: isUrlSaved, isYouTube: isYouTube }]
       }).catch(error => {
         console.error('Script injection error:', error);
       });
     });
   });
+}
+
+// Helper function to normalize YouTube URLs for comparison
+function normalizeYouTubeUrl(url) {
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname.includes('youtube.com')) {
+      const videoId = urlObj.searchParams.get('v');
+      if (videoId) {
+        return `youtube.com/watch?v=${videoId}`;
+      }
+    } else if (urlObj.hostname.includes('youtu.be')) {
+      const videoId = urlObj.pathname.substring(1);
+      if (videoId) {
+        return `youtube.com/watch?v=${videoId}`;
+      }
+    }
+    return url.toLowerCase();
+  } catch (e) {
+    console.error('Error normalizing URL:', e);
+    return url.toLowerCase();
+  }
 }
 
 // Function to remove the floating button from a tab
@@ -269,8 +203,16 @@ function createNotebook(name) {
         return;
       }
       
-      // Create new empty notebook
-      notebooks[name] = {};
+      // Create new notebook with proper structure
+      notebooks[name] = {
+        created_datetime: new Date().toISOString(),
+        last_updated_datetime: new Date().toISOString(),
+        last_sync_datetime: null,
+        notebookLM_id: null,
+        notebookLM_url: null,
+        notebookLM_title: null,
+        sources: {}  // Initialize empty sources object
+      };
       
       // Save updated notebooks
       chrome.storage.local.set({ notebooks, currentNotebook: name }, () => {
@@ -304,17 +246,25 @@ function addSourceToNotebook(notebookName, source) {
       // Generate a unique ID for the source
       const sourceId = `source_${Date.now()}`;
       
-      // Add source to notebook
-      notebooks[notebookName][sourceId] = {
+      // Add source to notebook's sources object
+      if (!notebooks[notebookName].sources) {
+        notebooks[notebookName].sources = {};
+      }
+      
+      notebooks[notebookName].sources[sourceId] = {
         url: source.url,
         title: source.title || source.url,
-        type: source.type || 'web',
-        added_datetime: source.datetime || new Date().toISOString()
+        linkType: source.type || 'web',  // Changed type to linkType to match interface
+        added_datetime: source.datetime || new Date().toISOString(),
+        added_to_notebook: false  // Initialize as not added to NotebookLM
       };
+      
+      // Update last_updated_datetime
+      notebooks[notebookName].last_updated_datetime = new Date().toISOString();
       
       // Save updated notebooks
       chrome.storage.local.set({ notebooks }, () => {
-        resolve({ notebookName, sourceId, source: notebooks[notebookName][sourceId] });
+        resolve({ notebookName, sourceId, source: notebooks[notebookName].sources[sourceId] });
       });
     });
   });
@@ -342,13 +292,16 @@ function deleteSourceFromNotebook(notebookName, sourceId) {
       }
       
       // Check if source exists
-      if (!notebooks[notebookName][sourceId]) {
+      if (!notebooks[notebookName].sources || !notebooks[notebookName].sources[sourceId]) {
         reject(new Error(`Source "${sourceId}" does not exist in notebook "${notebookName}"`));
         return;
       }
       
       // Delete source from notebook
-      delete notebooks[notebookName][sourceId];
+      delete notebooks[notebookName].sources[sourceId];
+      
+      // Update last_updated_datetime
+      notebooks[notebookName].last_updated_datetime = new Date().toISOString();
       
       // Save updated notebooks
       chrome.storage.local.set({ notebooks }, () => {
@@ -411,28 +364,17 @@ function updateSourceSyncStatus(request, sender, sendResponse) {
     const notebooks = result.notebooks || {};
     
     // Check if notebook exists and has the source
-    if (!notebooks[notebookName] || !notebooks[notebookName][sourceId]) {
+    if (!notebooks[notebookName] || !notebooks[notebookName].sources || !notebooks[notebookName].sources[sourceId]) {
       sendResponse({ status: 'error', error: 'Source not found' });
       return;
     }
     
     // Update the sync status
-    notebooks[notebookName][sourceId].added_to_notebook = added_to_notebook;
+    notebooks[notebookName].sources[sourceId].added_to_notebook = added_to_notebook;
     
     // Update last sync datetime if we're marking as synced
     if (added_to_notebook) {
-      // If the notebook doesn't have last_sync_datetime property, add it
-      if (!notebooks[notebookName].last_sync_datetime) {
-        // Create a new property for the notebook
-        Object.defineProperty(notebooks[notebookName], 'last_sync_datetime', {
-          value: new Date().toISOString(),
-          writable: true,
-          enumerable: true,
-          configurable: true
-        });
-      } else {
-        notebooks[notebookName].last_sync_datetime = new Date().toISOString();
-      }
+      notebooks[notebookName].last_sync_datetime = new Date().toISOString();
     }
     
     // Save the updated notebooks

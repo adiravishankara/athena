@@ -145,7 +145,7 @@ export class NotebookLMService {
           if (type === 'youtube' && !targetButton) {
             for (const element of allElements) {
               const text = element.textContent?.toLowerCase() || "";
-              if (text.includes("tube") || text.includes("video")) {
+              if (text.includes("video_youtubeyoutube")) {
                 console.log(`Found YouTube button with partial match: ${text}`);
                 targetButton = element;
                 break;
@@ -157,7 +157,7 @@ export class NotebookLMService {
           if (type === 'website' && !targetButton) {
             for (const element of allElements) {
               const text = element.textContent?.toLowerCase() || "";
-              if (text.includes("web") || text.includes("site") || text.includes("link")) {
+              if (text.includes("webwebsite")) {
                 console.log(`Found Website button with partial match: ${text}`);
                 targetButton = element;
                 break;

@@ -194,7 +194,7 @@ function App() {
             chrome.runtime.sendMessage({
                 action: 'ADD_SOURCE',
                 url: currentTab.url,
-                title: currentTab.title || 'Untitled Page',
+                title: currentTab.title,
                 type: linkType,
                 datetime: new Date().toISOString(),
                 added_to_notebook: false
@@ -297,7 +297,7 @@ function App() {
                         
                         // Small delay between sources to avoid overwhelming NotebookLM
                         if (i < sources.length - 1) {
-                            await new Promise(resolve => setTimeout(resolve, 500));
+                            await new Promise(resolve => setTimeout(resolve, 1000));
                         }
                     }
                 } catch (error) {
