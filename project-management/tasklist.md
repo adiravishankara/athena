@@ -93,7 +93,7 @@
   - [x] Update to add sources from extension instead of current tab URL
   - [x] Enhance to add all sources from notebook instead of just the first one
   - [x] Add source type detection to automatically select the right source type in NotebookLM
-  - [x] Temporarily skip non-web links (Google Docs, Slides, YouTube) for stability
+  - [x] Temporarily skip non-web links (Google Docs, Slides, PDF) for stability
 
 ### Phase 2: Enhanced Features (Future)
 - [ ] Implement notebook management

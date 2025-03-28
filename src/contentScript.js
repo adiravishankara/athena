@@ -127,9 +127,9 @@ function injectFloatingButton() {
           }
           
           if (response && response.status === 'success') {
-            // Visual feedback
-            button.style.background = '#2e7d32';
-            button.innerHTML = "✓";
+            // Visual feedback REMOVED - Background script will handle state on refresh/navigation
+            // button.style.background = '#2e7d32'; // REMOVED
+            // button.innerHTML = "✓"; // REMOVED
             showToast(`Added ${linkType === 'youtube' ? 'YouTube video' : 'page'} to notebook`, false);
           } else {
             showToast(response && response.error ? response.error : "Failed to add to notebook", true);

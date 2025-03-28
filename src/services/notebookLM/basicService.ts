@@ -6,7 +6,7 @@ export interface Source {
   title?: string;
 }
 
-export type SourceType = 'website' | 'youtube' | 'googledocs' | 'googleslides';
+export type SourceType = 'website' | 'youtube' | 'googledocs' | 'googleslides' | 'pdf';
 
 export class NotebookLMService {
   // Determine the source type based on URL
@@ -19,6 +19,8 @@ export class NotebookLMService {
       return 'googledocs';
     } else if (lowerUrl.includes('docs.google.com/presentation')) {
       return 'googleslides';
+    } else if (lowerUrl.endsWith('.pdf')) {
+      return 'pdf';
     } else {
       // Default to website for all other URLs
       return 'website';
