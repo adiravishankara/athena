@@ -1,10 +1,11 @@
 # Task List
 
 ## Initial Extension Prototype
+
 - [x] Setup project with Vite, React, and TypeScript
 - [x] setup vite.config.ts, manifest.json, tsconfig.node.json files
 - [x] Implement basic UI with popup interface
-    - Currently the default react app
+  - Currently the default react app
 - [x] Setup icons in public folder
 - [x] Setup the background.js worker to manage chrome extension
 - [x] Implement UI according to design
@@ -25,9 +26,10 @@
   - [x] Make button appear only when Research Mode is active
   - [x] Add button styling according to design
 
-## Current Tasks 
+## Current Tasks
 
 - [x] Create a basic Chrome extension that allows users to save sources to notebooks
+
   - [x] Create manifest.json
   - [x] Create popup.html
   - [x] Create background.js
@@ -40,6 +42,7 @@
   - [x] Update UI based on research mode state
 
 ## Next Steps
+
 - [x] Fix build errors
   - [x] Fix unused parameter warning in App.tsx
   - [x] Fix unused import and missing module in vite.config.ts
@@ -64,11 +67,13 @@
   - [x] Ensure consistent button size across different websites
   - [x] Fix button switching back from checkmark to plus sign
 - [x] Improve UI for better user experience
+
   - [x] Make only the included sources section scrollable
   - [x] Add a counter to show the number of sources in a notebook
   - [x] Make source links clickable to open in new tabs
 
 - [x] Optimize the Application structure
+
   - [x] Rewrite App.tsx to App2.tsx with improved organization
   - [x] Add source type detection for different link types (YouTube, website, PDF, Google Docs, Google Slides)
   - [x] Add visual indicators (color badges) for different source types in the UI
@@ -82,6 +87,7 @@
 ## Notebook Integration
 
 ### Phase 1: Basic Source Sync (Current)
+
 - [x] Update manifest.json with required permissions
 - [x] Create NotebookLMService
 - [x] Add sync button to extension UI
@@ -96,19 +102,70 @@
   - [x] Temporarily skip non-web links (Google Docs, Slides, PDF) for stability
 
 ### Phase 2: Enhanced Features (Future)
+
 - [ ] Implement notebook management
 - [ ] Add error handling and retry logic
 - [ ] Add progress indicators
 - [ ] Add success/failure notifications
 - [ ] Improve UI integration
 
+## Notebook Management Enhancements
+
+### Phase 3: Notebook Management Implementation
+
+- [ ] **Open NotebookLM in Background Tab**
+
+  - [ ] Check if NotebookLM is already open in any tab.
+  - [ ] If not open, create a new tab with the NotebookLM URL.
+  - [ ] Ensure the tab is opened in the background (not focused).
+
+- [ ] **Scan Available Notebooks**
+
+  - [ ] Inject a content script into the NotebookLM page to access the DOM.
+  - [ ] Locate the HTML elements that contain notebook information (e.g., `notebook_id` and `notebook_name`).
+  - [ ] Extract the `notebook_id` and `notebook_name` from the HTML.
+  - [ ] Sync the extracted notebook data in the local database (Update existing, create new, delete removed) (e.g., using `chrome.storage.local`). Remember that notebook data looks like:
+        <!-- interface NotebookData {
+              created_datetime: string;
+              last_updated_datetime: string;
+              last_sync_datetime: string | null;
+              notebookLM_id: string | null;
+              notebookLM_url: string | null;
+              notebookLM_title: string | null;
+              sources: Sources;
+          } -->
+  - [ ] Implement error handling for cases where the notebook data cannot be retrieved.
+
+- [ ] **Manage Notebooks in Extension UI**
+  - [x] Update the extension popup UI to display the list of available notebooks.
+  - [x] Allow users to select an existing notebook from the list
+  - [x] Provide an option to create a new notebook directly from the extension UI.
+  - [x] Implement functionality to manage sources within the selected notebook.
+    - [ ] Allow users to add, edit, or delete sources associated with the selected notebook.
+    - [ ] Ensure that changes are reflected in the local database and synced with NotebookLM.
+
+### Additional Considerations
+
+- [ ] **User Experience Enhancements**
+
+  - [ ] Ensure the notebook selection process is intuitive and user-friendly.
+  - [ ] Provide feedback to users when notebooks are successfully added or modified.
+  - [ ] Implement loading indicators while fetching notebook data.
+
+- [ ] **Testing and Validation**
+  - [ ] Test the functionality of opening NotebookLM and scanning notebooks across different scenarios.
+  - [ ] Validate that the notebook data is correctly stored and retrieved from the local database.
+  - [ ] Conduct user testing to ensure the notebook management features meet user expectations.
+
 ## BraveSearch API Integration
+
 - [ ] Extract keywords from notebook entries using NLP
 - [ ] Implement queries to BraveSearch API
 - [ ] Parse API responses
 - [ ] Display suggested sources in extension UI
 
 ## Final Testing & Deployment
+
 - [ ] Conduct QA testing
 - [ ] Fix bugs identified during testing
 - [ ] Publish extension on Chrome Web Store

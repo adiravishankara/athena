@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; // Added React import
 import "./App.css";
-import { NotebookLMService } from "./services/notebookLM/basicService";
-
-/// <reference types="chrome"/>
+import { NotebookLMService } from "./services/notebookLM/basicService.ts"; // Added .ts extension
+ 
+ /// <reference types="chrome"/>
 
 interface Source {
     url: string;
@@ -39,7 +39,8 @@ function App() {
     const [newNotebookName, setNewNotebookName] = useState("");
     const [sources, setSources] = useState<[string, Source][]>([]);
     const [isAddingSource, setIsAddingSource] = useState(false);
-    const [isSyncing, setIsSyncing] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false); // This seems to be for syncing *sources* to NotebookLM
+    const [isSyncingNotebooks, setIsSyncingNotebooks] = useState(false); // State for syncing the notebook list
     const notebookService = new NotebookLMService();
 
     // This function is used to get the notebooks, current notebook, and research mode from the storage
@@ -107,7 +108,8 @@ function App() {
     const handleNotebookChange = (
         event: React.ChangeEvent<HTMLSelectElement>,
     ) => {
-        const value = event.target.value;
+        // Explicitly cast currentTarget as a workaround for linter
+        const value = (event.currentTarget as HTMLSelectElement).value;
 
         if (value === "create_new") {
             setIsCreatingNotebook(true);
@@ -357,7 +359,8 @@ function App() {
                         <input
                             type="text"
                             value={newNotebookName}
-                            onChange={(e) => setNewNotebookName(e.target.value)}
+                            // Use event.currentTarget
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewNotebookName(e.currentTarget.value)}
                             placeholder="Enter notebook name"
                         />
                         <div className="button-group">

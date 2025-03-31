@@ -186,6 +186,187 @@ chrome.tabs.onCreated.addListener((tab) => {
   });
 });
 
+// Function to ensure NotebookLM tab is open and return its ID
+async function ensureNotebookLMTab() {
+  console.log('Ensuring NotebookLM tab exists...');
+  const notebookLMUrl = "https://notebooklm.google.com/*";
+
+  try {
+    // Query for existing NotebookLM tabs
+    const tabs = await chrome.tabs.query({ url: notebookLMUrl });
+
+    if (tabs.length > 0) {
+      // Found an existing tab, return its ID
+      console.log('Found existing NotebookLM tab:', tabs[0].id);
+      return tabs[0].id;
+    } else {
+      // No tab found, create a new one in the background
+      console.log('No NotebookLM tab found, creating a new one...');
+      const newTab = await chrome.tabs.create({ url: "https://notebooklm.google.com/", active: false });
+      console.log('Created new NotebookLM tab:', newTab.id);
+      // It might take a moment for the tab to fully load, but we have the ID
+      return newTab.id;
+    }
+  } catch (error) {
+    console.error('Error ensuring NotebookLM tab:', error);
+    throw new Error('Failed to ensure NotebookLM tab: ' + error.message); // Re-throw or handle as appropriate
+  }
+}
+
+// Function to be injected into NotebookLM page to extract notebook data
+// IMPORTANT: Selectors are placeholders and need verification/adjustment!
+function extractNotebookDataFromDOM() {
+  console.log('Attempting to extract notebook data from DOM...');
+  const notebooks = [];
+  // Placeholder selector for individual notebook list items
+  const notebookElements = document.querySelectorAll('.notebook-list-item'); // Adjust selector
+
+  if (!notebookElements || notebookElements.length === 0) {
+    console.warn('Could not find notebook elements with selector ".notebook-list-item".');
+    // Try an alternative or return empty
+    // const alternativeElements = document.querySelectorAll('...');
+    // if (!alternativeElements) return notebooks;
+    // notebookElements = alternativeElements;
+     return notebooks; // Return empty if no elements found
+  }
+
+  notebookElements.forEach(element => {
+    try {
+      // Placeholder selector for the notebook name/title within the item
+      const nameElement = element.querySelector('.notebook-name'); // Adjust selector
+      // Placeholder logic for getting the notebook ID (might be data attribute, part of a link, etc.)
+      const idElement = element.querySelector('[data-notebook-id]'); // Adjust selector/attribute
+      const notebookId = idElement ? idElement.getAttribute('data-notebook-id') : element.id || null; // Adjust logic
+
+      const notebookName = nameElement ? nameElement.innerText.trim() : 'Untitled Notebook';
+
+      if (notebookId && notebookName) {
+        notebooks.push({
+          notebookLM_id: notebookId,
+          notebookLM_title: notebookName,
+        });
+      } else {
+         console.warn('Could not extract ID or Name for an element:', element);
+      }
+    } catch (error) {
+      console.error('Error processing a notebook element:', element, error);
+    }
+  });
+
+  console.log(`Extracted ${notebooks.length} notebooks:`, notebooks);
+  return notebooks;
+}
+
+// Function to orchestrate scanning notebooks in the specified tab
+async function scanNotebookLMNotebooks(tabId) {
+  console.log(`Scanning for notebooks in tab ID: ${tabId}`);
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: extractNotebookDataFromDOM,
+    });
+
+    // executeScript returns an array of results, one for each frame.
+    // We assume the main frame is the first one.
+    if (results && results[0] && results[0].result) {
+      console.log('Successfully scanned notebooks:', results[0].result);
+      return results[0].result; // This is the array of { notebookLM_id, notebookLM_title }
+    } else {
+      console.warn('No results received from script execution or result was empty.');
+      return []; // Return empty array if no data found
+    }
+  } catch (error) {
+    console.error(`Error executing notebook scanning script in tab ${tabId}:`, error);
+    // Check for specific errors like missing host permissions
+    if (error.message.includes('Cannot access contents of url')) {
+       throw new Error(`Cannot access NotebookLM page. Ensure host permissions for "https://notebooklm.google.com/*" are granted in manifest.json. Original error: ${error.message}`);
+    }
+     if (error.message.includes('No tab with id')) {
+       throw new Error(`NotebookLM tab with ID ${tabId} not found or closed. Original error: ${error.message}`);
+    }
+    throw new Error('Failed to scan notebooks: ' + error.message);
+  }
+}
+
+
+// Function to sync scanned notebook data with local storage
+async function syncNotebookData(scannedNotebooks) {
+  console.log('Syncing scanned notebooks with local storage:', scannedNotebooks);
+
+  try {
+    // 1. Get current stored notebooks
+    const storageResult = await chrome.storage.local.get(['notebooks']);
+    const storedNotebooks = storageResult.notebooks || {}; // Use object format { name: data }
+    const updatedNotebooks = { ...storedNotebooks }; // Create a copy to modify
+    const nowISO = new Date().toISOString();
+
+    const scannedNotebookMap = new Map(scannedNotebooks.map(nb => [nb.notebookLM_id, nb]));
+    const storedNotebookLMIds = new Set();
+
+    // 2. Process stored notebooks against scanned data
+    for (const notebookName in updatedNotebooks) {
+      const storedData = updatedNotebooks[notebookName];
+      if (storedData.notebookLM_id) { // Only process notebooks that were previously synced
+        storedNotebookLMIds.add(storedData.notebookLM_id);
+        const scannedMatch = scannedNotebookMap.get(storedData.notebookLM_id);
+
+        if (scannedMatch) {
+          // Match found: Update title and sync time if changed
+          if (storedData.notebookLM_title !== scannedMatch.notebookLM_title) {
+             console.log(`Updating title for notebook ID ${storedData.notebookLM_id}: "${storedData.notebookLM_title}" -> "${scannedMatch.notebookLM_title}"`);
+             storedData.notebookLM_title = scannedMatch.notebookLM_title;
+             storedData.last_updated_datetime = nowISO; // Also update this? Or just sync time? Let's update both.
+          }
+          storedData.last_sync_datetime = nowISO;
+        } else {
+          // No match found in scan: Mark as stale (as per plan)
+          console.log(`Marking notebook "${notebookName}" (ID: ${storedData.notebookLM_id}) as stale.`);
+          storedData.notebookLM_id = null; // Mark as stale
+          storedData.notebookLM_title = storedData.notebookLM_title || notebookName; // Keep last known title or name
+          storedData.last_sync_datetime = nowISO;
+          storedData.last_updated_datetime = nowISO;
+        }
+      }
+      // Keep notebooks that were created locally (notebookLM_id is null) as they are
+    }
+
+    // 3. Process scanned notebooks against stored data (to find new ones)
+    for (const [scannedId, scannedData] of scannedNotebookMap.entries()) {
+      if (!storedNotebookLMIds.has(scannedId)) {
+        // New notebook found in scan, needs to be added to storage
+        // We need a unique local name. Using title for now, but might need refinement if titles clash.
+        let newNotebookName = scannedData.notebookLM_title;
+        let counter = 1;
+        // Ensure unique name in local storage
+        while (updatedNotebooks[newNotebookName]) {
+            newNotebookName = `${scannedData.notebookLM_title} (${counter++})`;
+        }
+
+        console.log(`Adding new notebook found in scan: "${newNotebookName}" (ID: ${scannedId})`);
+        updatedNotebooks[newNotebookName] = {
+          created_datetime: nowISO,
+          last_updated_datetime: nowISO,
+          last_sync_datetime: nowISO,
+          notebookLM_id: scannedId,
+          notebookLM_url: `https://notebooklm.google.com/notebook/${scannedId}`, // Construct URL
+          notebookLM_title: scannedData.notebookLM_title,
+          sources: {} // Initialize empty sources
+        };
+      }
+    }
+
+    // 4. Save the updated notebooks back to storage
+    await chrome.storage.local.set({ notebooks: updatedNotebooks });
+    console.log('Successfully synced notebooks to local storage:', updatedNotebooks);
+    return updatedNotebooks; // Return the updated list
+
+  } catch (error) {
+    console.error('Error syncing notebook data:', error);
+    throw new Error('Failed to sync notebook data: ' + error.message);
+  }
+}
+
+
 // Notebook operations
 function createNotebook(name) {
   return new Promise((resolve, reject) => {
@@ -389,6 +570,35 @@ function updateSourceSyncStatus(request, sender, sendResponse) {
 // Listener for messages from the frontend and content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('Message received:', request);
+
+  // Handle triggering the sync process
+  if (request.action === 'SYNC_NOTEBOOKS') {
+    ensureNotebookLMTab()
+      .then(tabId => {
+        if (!tabId) {
+          // If ensureNotebookLMTab failed somehow
+          throw new Error('Failed to get NotebookLM tab ID.');
+        }
+        console.log('NotebookLM tab ensured, ID:', tabId, '. Now scanning...');
+        // Chain the scanning step
+        return scanNotebookLMNotebooks(tabId);
+      })
+      .then(scannedNotebooks => {
+        // Call the sync function
+        console.log('Notebooks scanned, now syncing with storage:', scannedNotebooks);
+        return syncNotebookData(scannedNotebooks);
+      })
+      .then(syncedNotebooks => {
+        // Sync successful, send back the final synced data
+        console.log('Sync process completed successfully.');
+        sendResponse({ status: 'success', data: { message: 'Notebooks synced successfully.', notebooks: syncedNotebooks } });
+      })
+      .catch(error => {
+        console.error('Error during SYNC_NOTEBOOKS process:', error);
+        sendResponse({ status: 'error', error: error.message });
+      });
+    return true; // Indicates asynchronous response
+  }
   
   if (request.action === 'CREATE_NOTEBOOK') {
     createNotebook(request.name)
