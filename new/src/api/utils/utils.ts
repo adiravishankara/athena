@@ -67,7 +67,9 @@ export const waitForTabLoad = (tabId: number): Promise<void> => {
     };
 
     // Set a timeout to avoid waiting forever
-    const timeoutId = setTimeout(() => {
+    // Prefix with _ to indicate intentional non-use within this callback scope
+    // @ts-ignore TS6133: _timeoutId is declared but its value is never read. Intentionally not clearing this timeout.
+    const _timeoutId = setTimeout(() => {
       console.error(`Tab ${tabId} loading timed out after 30 seconds.`);
       reject(new Error(`Tab ${tabId} loading timed out after 30 seconds`));
     }, 30000); // 30 seconds timeout

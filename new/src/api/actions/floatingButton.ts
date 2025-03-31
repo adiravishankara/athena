@@ -1,5 +1,5 @@
 import { getResearchMode as storeGetResearchMode, setResearchMode as storeSetResearchMode, getCurrentNotebookName, getNotebooks } from './notebookStore.ts';
-import { getTab } from '../chrome/tabs.ts'; // May not be needed if URL is passed directly
+// import { getTab } from '../chrome/tabs.ts'; // May not be needed if URL is passed directly - Removed unused import
 import { normalizeUrlForComparison } from '../utils/utils.ts'; // Correct path to utils
 
 // --- Research Mode ---

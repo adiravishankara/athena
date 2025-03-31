@@ -1,4 +1,4 @@
-import React, { StrictMode } from 'react'; // Import React
+import React, { StrictMode } from 'react'; // Added React import for module-based usage
 import { createRoot } from 'react-dom/client';
 import './index.css'; // Assuming index.css will be moved too
 import Popup from './pages/Popup.tsx'; // Renamed App component to Popup

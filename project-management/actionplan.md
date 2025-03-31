@@ -1,79 +1,75 @@
-# Athena Extension Refactor - Action Plan
+# TypeScript Error Fix Plan
 
-## Current Progress (As of 3/31/2025)
-✅ **API Layer Completed**
-- Chrome API wrappers (`storage`, `tabs`, `scripting`) 
-- Action modules (`notebookStore`, `floatingButton`, `notebookLM`)
-- Utility functions 
+## Error Categories and Solutions
 
-✅ **UI Components Created**
-- Popup component refactored
-- CSS styles moved to proper locations
+### 1. Unused Imports (15 errors)
+**Files Affected:**
+- `new/src/api/actions/floatingButton.ts`
+- `new/src/api/actions/notebookLM.ts` 
+- `new/src/api/utils/utils.ts`
+- `new/src/background/background.ts`
+- `new/src/content/contentScript.ts`
+- `new/src/ui/main.tsx`
+- `new/src/ui/pages/Popup.tsx`
 
-⚠️ **Partial Work**
-- Content script styles extracted but not integrated
-- Background script needs modernization
+**Solution:**
+- Remove unused imports (marked by TS6133)
+- For utility functions that might be needed later, consider:
+  - Adding `// eslint-disable-next-line @typescript-eslint/no-unused-vars` 
+  - Or keeping them with proper JSDoc comments if they're part of the API
 
-## Milestone 1: Complete Core Infrastructure ✅
-- [x] Update `manifest.json` for new architecture ✔︎
-  - Added required permissions
-  - Updated content script references
-- [x] Finalize background script ✔︎
-  - Created message router
-  - Integrated with API modules
-- [x] Verified API wrapper coverage ✔︎
-  - Background script uses wrappers for all Chrome API calls
+### 2. Missing CSS Modules (2 errors)
+**Files Affected:**
+- `new/src/ui/main.tsx` - Can't find './index.css'
+- `new/src/ui/pages/Popup.tsx` - Can't find '../styles/App.css'
 
-## Milestone 2: Content Script Updates ✅
-- [x] Integrated extracted CSS with floating button ✔︎
-- [x] Updated toast notification system ✔︎
-- [x] Ensured research mode state sync ✔︎
-- [x] Removed drag functionality ✔︎
-- [x] Implemented proper messaging with background script ✔︎
-  - Uses CSS classes for all styling
-  - Simplified message handling
-  - Aligned with background script protocol
+**Solution:**
+1. Verify CSS file locations:
+   - Check if CSS files exist in expected locations
+   - If moved, update import paths
+   - If missing, create basic CSS files
 
-## Milestone 3: UI Integration ✅
-- [x] Verified popup connects to background via messages ✔︎
-- [x] Tested all notebook operations: ✔︎
-  - Create/select notebooks
-  - Add/delete sources
-  - Track sync status
-- [x] Implemented loading/error states throughout UI ✔︎
-
-## Milestone 4: Testing & Cleanup
-- [ ] Manual testing checklist:
-  - Popup functionality
-  - Floating button on different sites
-  - NotebookLM integration
-- [ ] Remove deprecated files:
-  - Old service layer
-  - Direct Chrome API calls
-- [ ] Update build configuration if needed
-
-## Milestone 5: Documentation
-- [ ] Architecture overview
-- [ ] Message protocol specification
-- [ ] Update README with new setup instructions
-
-## Immediate Next Steps (Milestone 1)
-1. Update manifest permissions:
+2. Update tsconfig.json to include CSS module declarations:
 ```json
 {
-  "permissions": [
-    "storage",
-    "tabs", 
-    "scripting",
-    "activeTab"
-  ],
-  "host_permissions": [
-    "https://notebooklm.google.com/*"
-  ]
+  "compilerOptions": {
+    "types": ["vite/client"]
+  }
 }
 ```
 
-2. Create message handler stub in background script
-3. Verify API wrappers handle all needed Chrome APIs
+### 3. Unused Variables (4 errors)
+**Files Affected:**
+- `new/src/content/contentScript.ts` - Unused 'title'
+- `new/src/ui/pages/Popup.tsx` - Unused 'sender'
+- `new/src/background/background.ts` - Unused 'currentNotebook', 'notebooks'
 
-Would you like me to proceed with any specific part of Milestone 1?
+**Solution:**
+- Remove truly unused variables
+- For callback parameters like 'sender', prefix with underscore (`_sender`) to indicate intentional non-use
+
+## Implementation Steps
+
+1. **Clean Up Imports**
+   - Remove all unused imports marked by TS6133
+   - Audit if any removed imports might be needed for type definitions
+
+2. **CSS Resolution**
+   - Create missing CSS files with basic styles
+   - Ensure proper import paths in components
+   - Add vite/client types to tsconfig
+
+3. **Variable Cleanup**
+   - Remove unused variables where appropriate
+   - Mark intentionally unused parameters with underscore prefix
+
+4. **Build Verification**
+   - Run `npm run build` after changes
+   - Verify no TypeScript errors remain
+
+## Priority Order
+1. Fix CSS module errors (blocks build)
+2. Clean up unused imports
+3. Address unused variables
+
+Would you like me to proceed with implementing any of these fixes?

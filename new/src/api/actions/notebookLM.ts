@@ -1,12 +1,12 @@
 /// <reference types="chrome"/>
 /// <reference lib="dom" />
 
-import { Notebooks, Notebook, Source, SourceType, NotebookLMServiceSource } from '../../common/types.ts';
+import { Notebooks, SourceType, NotebookLMServiceSource } from '../../common/types.ts'; // Removed unused Notebook, Source
 import { executeScript } from '../chrome/scripting.ts';
-import { queryTabs, createTab, getTab, updateTab } from '../chrome/tabs.ts';
+import { queryTabs, createTab } from '../chrome/tabs.ts'; // Removed unused getTab, updateTab
 import { getLocalStorage, setLocalStorage } from '../chrome/storage.ts';
-import { getNotebooks, getCurrentNotebookName, updateSourceSyncStatus } from './notebookStore.ts';
-import { normalizeUrlForComparison } from '../utils/utils.ts'; // Assuming this exists now
+import { getNotebooks, updateSourceSyncStatus } from './notebookStore.ts'; // Removed unused getCurrentNotebookName
+// import { normalizeUrlForComparison } from '../utils/utils.ts'; // Assuming this exists now - Removed unused import
 import { waitForTabLoad } from '../utils/utils.ts'; // Assuming this will be added
 
 const NOTEBOOKLM_URL_PATTERN = "https://notebooklm.google.com/*";

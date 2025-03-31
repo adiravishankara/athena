@@ -53,7 +53,7 @@ function handleButtonClick(event: MouseEvent) {
     console.log("Floating button clicked.");
 
     const url = window.location.href;
-    const title = document.title || url; // Use URL as fallback title
+    // const title = document.title || url; // Title is not currently sent to background
 
     // Basic type detection
     let linkType: SourceType = 'website'; // Default to 'website'

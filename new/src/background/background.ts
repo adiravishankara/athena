@@ -1,6 +1,6 @@
-import { Notebooks, Source, NotebookLMServiceSource } from '../common/types.ts';
+import { Notebooks, Source } from '../common/types.ts'; // Removed unused NotebookLMServiceSource
 import { getLocalStorage, setLocalStorage } from '../api/chrome/storage.ts';
-import { queryTabs, getTab, createTab, updateTab } from '../api/chrome/tabs.ts';
+import { queryTabs, getTab } from '../api/chrome/tabs.ts'; // Removed unused createTab, updateTab
 import { executeScript } from '../api/chrome/scripting.ts';
 import {
     getNotebooks,
@@ -10,11 +10,12 @@ import {
     deleteSourceFromNotebook,
     setCurrentNotebook,
     getResearchMode,
-    setResearchMode,
-    updateSourceSyncStatus
+    setResearchMode
+    // updateSourceSyncStatus // Removed unused import
 } from '../api/actions/notebookStore.ts';
 import { addSourcesToNotebookLM, scanAndSyncNotebooks } from '../api/actions/notebookLM.ts';
-import { shouldShowButtonForUrl, getButtonStateForUrl } from '../api/actions/floatingButton.ts';
+// import { shouldShowButtonForUrl, getButtonStateForUrl } from '../api/actions/floatingButton.ts'; // Removed unused shouldShowButtonForUrl
+import { getButtonStateForUrl } from '../api/actions/floatingButton.ts'; // Keep getButtonStateForUrl
 
 // Initialize extension
 chrome.runtime.onInstalled.addListener(async () => {
@@ -168,10 +169,10 @@ async function injectFloatingButton(tabId: number): Promise<void> {
         return;
     }
 
-    const [currentNotebook, notebooks] = await Promise.all([
-        getCurrentNotebookName(),
-        getNotebooks()
-    ]);
+    // const [currentNotebook, notebooks] = await Promise.all([ // Removed unused variables
+    //     getCurrentNotebookName(),
+    //     getNotebooks()
+    // ]);
 
     const buttonState = await getButtonStateForUrl(tab.url);
     if (!buttonState.shouldShow) return;

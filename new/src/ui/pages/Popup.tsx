@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import '../styles/App.css'; // Assuming App.css is moved to ui/styles/
-import { Notebooks, Source, Notebook } from "../../common/types.ts"; // Import shared types
+import { Notebooks, Source } from "../../common/types.ts"; // Removed unused Notebook type
 
 // Placeholder for the messaging hook/utility
 // We'll need to implement this to handle communication with the background script
@@ -35,7 +35,7 @@ const useMessaging = () => {
     // Placeholder for listening to messages pushed FROM the background
     // In a real implementation, this would use chrome.runtime.onMessage.addListener
     const addMessageListener = useCallback((callback: (message: any) => void) => {
-        const listener = (message: any, sender: chrome.runtime.MessageSender) => {
+        const listener = (message: any, _sender: chrome.runtime.MessageSender) => { // Prefixed unused sender
             // Optional: Filter messages based on sender or origin if needed
             console.log("UI Received pushed message:", message);
             callback(message);
