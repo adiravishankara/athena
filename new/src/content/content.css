@@ -1,0 +1,80 @@
+/* Styles for elements injected by the content script */
+
+/* Floating Action Button */
+#athena-floating-button {
+  position: fixed;
+  bottom: 50%; /* Initial position */
+  right: 20px; /* Initial position */
+  transform: translateY(50%); /* Center vertically */
+  width: 40px;
+  height: 40px;
+  background-color: #004d40; /* Default color (add) */
+  color: white;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 2147483647; /* Max z-index */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1; /* Use line-height 1 with flex alignment */
+  text-align: center;
+  font-family: Arial, sans-serif;
+  user-select: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease-in-out, box-shadow 0.2s ease;
+}
+
+/* State: Already Saved */
+#athena-floating-button.saved {
+  background-color: #2e7d32; /* Green */
+}
+
+/* Hover effect (general) */
+#athena-floating-button:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    transform: translateY(50%) scale(1.05); /* Slight scale up on hover */
+}
+
+/* Specific hover for YouTube (overrides general hover transform if needed) */
+#athena-floating-button.youtube:hover {
+  transform: translateY(50%) scale(1.1); /* Larger scale for YouTube */
+}
+
+/* Style when dragging (optional, could be added via JS) */
+/* #athena-floating-button.dragging {
+  cursor: grabbing;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+} */
+
+
+/* Toast Notifications */
+.athena-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  z-index: 2147483647; /* Max z-index */
+  font-size: 14px;
+  opacity: 0; /* Start transparent for fade-in */
+  transition: opacity 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.athena-toast.show {
+    opacity: 1;
+}
+
+.athena-toast.success {
+  background-color: rgba(46, 125, 50, 0.9); /* Green */
+}
+
+.athena-toast.error {
+  background-color: rgba(211, 47, 47, 0.9); /* Red */
+}

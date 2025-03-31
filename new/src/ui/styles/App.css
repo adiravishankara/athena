@@ -1,0 +1,465 @@
+/* App.css */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  color: #333;
+  /* Ensure body takes up space for popup */
+  width: 400px;
+  height: 600px;
+  overflow: hidden; /* Prevent scrollbars on body */
+}
+
+.app-container {
+  width: 100%; /* Use full width of body */
+  height: 100%; /* Use full height of body */
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  overflow: hidden; /* Container handles overflow */
+}
+
+/* Loading State */
+.app-container.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #555;
+}
+
+/* Error Banner */
+.error-banner {
+  background-color: #fdecea;
+  color: #a94442;
+  padding: 10px 20px;
+  font-size: 13px;
+  text-align: center;
+  border-bottom: 1px solid #f5c6cb;
+  flex-shrink: 0;
+}
+
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+}
+
+.logo-container h1 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1; /* Adjust line height for h1 */
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  font-size: 14px;
+}
+
+/* Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #004d40;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #004d40;
+}
+
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Notebook Section */
+.notebook-section {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.notebook-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px; /* Reduced margin */
+}
+
+
+.notebook-section h2 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0; /* Remove default margin */
+  line-height: 1;
+}
+
+.notebook-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+}
+
+.notebook-select:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+
+.create-notebook {
+  margin-top: 10px;
+}
+
+.create-notebook input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.button-group button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  background-color: #004d40;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.button-group button:last-child {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+/* Add Source Section */
+.add-source-section {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.add-current-tab-button {
+  padding: 10px 16px;
+  background-color: #004d40;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.add-current-tab-button:hover:not(:disabled) {
+  background-color: #00695c;
+}
+
+.add-current-tab-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Sources Section */
+.sources-section {
+  padding: 15px 20px 10px 20px; /* Reduced bottom padding */
+  flex: 1; /* Allow growing */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Handle overflow within this section */
+  min-height: 100px; /* Ensure it has some minimum height */
+}
+
+.sources-section h2 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0; /* Prevent shrinking */
+  line-height: 1;
+}
+
+.sources-count {
+  font-size: 14px;
+  color: #777;
+  font-weight: normal;
+}
+
+.source-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto; /* Enable vertical scroll */
+  flex-grow: 1; /* Allow list to take available space */
+  /* max-height: calc(100% - 30px); Removed fixed max-height */
+}
+
+/* Custom Scrollbar (optional) */
+.source-list::-webkit-scrollbar {
+  width: 6px;
+}
+.source-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.source-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+.source-list::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+
+.source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 5px 8px 0; /* Adjusted padding */
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s;
+}
+.source-item:last-child {
+    border-bottom: none; /* Remove border for last item */
+}
+
+.source-item.synced .source-info {
+    /* Optional: Style synced items differently */
+    /* opacity: 0.7; */
+}
+
+
+.source-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0; /* Prevent overflow issues */
+  cursor: pointer;
+}
+
+.source-type-badge {
+  width: 6px; /* Slimmer badge */
+  height: 24px; /* Shorter badge */
+  border-radius: 3px;
+  margin-right: 8px; /* Reduced margin */
+  flex-shrink: 0;
+}
+
+.source-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevent overflow issues */
+  flex: 1;
+}
+
+.source-title {
+  font-weight: 500;
+  font-size: 13px; /* Slightly smaller */
+  margin-bottom: 2px; /* Reduced margin */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.source-url {
+  font-size: 11px; /* Smaller URL */
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.source-actions {
+  display: flex;
+  align-items: center;
+  margin-left: 8px; /* Reduced margin */
+}
+
+.delete-button {
+  cursor: pointer;
+  font-size: 18px; /* Keep size for clickability */
+  color: #aaa;
+  padding: 0 5px; /* Add padding for easier clicking */
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.delete-button:hover {
+  color: #f44336; /* Red hover */
+}
+
+.sync-status {
+  color: #4caf50; /* Green checkmark */
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.no-sources {
+  color: #777;
+  font-size: 14px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* Version Info */
+.version-info {
+  padding: 8px 20px; /* Reduced padding */
+  border-top: 1px solid #e0e0e0;
+  text-align: right;
+  font-size: 11px; /* Smaller font */
+  color: #999; /* Lighter color */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Sync Button (in header) */
+.sync-button {
+  background-color: transparent; /* Make it look less prominent */
+  color: #666;
+  border: 1px solid #ccc;
+  padding: 4px 8px; /* Smaller padding */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px; /* Smaller font */
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.sync-button:hover:not(:disabled) {
+  background-color: #eee;
+  border-color: #bbb;
+  color: #333;
+}
+
+.sync-button:disabled {
+  color: #bbb;
+  border-color: #ddd;
+  cursor: not-allowed;
+}
+
+/* Add to NotebookLM Section */
+.add-to-notebooklm-section {
+  padding: 10px 20px; /* Reduced padding */
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f8f8f8;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.add-button { /* Style for the main "Add Sources to NotebookLM" button */
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 16px; /* Adjusted padding */
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.add-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #3367d6;
+}
+
+.help-text {
+  font-size: 11px; /* Smaller help text */
+  color: #777;
+  margin-top: 6px; /* Reduced margin */
+  text-align: center;
+}
